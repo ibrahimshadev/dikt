@@ -236,7 +236,7 @@ html, body {
 /* Settings Panel */
 .settings-panel {
   position: absolute;
-  bottom: 60px; /* Position above the pill */
+  bottom: 48px; /* Position above the pill */
   left: 50%;
   transform: translateX(-50%) translateY(8px) scale(0.98);
   width: 340px;
