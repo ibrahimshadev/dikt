@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/ibrahimshadev/dikt/compare/v1.2.0...v1.3.0) (2026-02-03)
+
+
+### Bug Fixes
+
+*  API key is resetting on app close fixed ([2c203fc](https://github.com/ibrahimshadev/dikt/commit/2c203fccae5f3691040af569bf42e43757d72fd4))
+
+
+### Features
+
+* **ui:** expand settings panel from pill position ([ae3d48d](https://github.com/ibrahimshadev/dikt/commit/ae3d48d704e5183a4209daf29c1263a90440248d))
+
 # [1.2.0](https://github.com/ibrahimshadev/dikt/compare/v1.1.10...v1.2.0) (2026-02-03)
 
 
