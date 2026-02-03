@@ -1,11 +1,14 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Dikt",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "identifier": "com.dikt.app",
   "bundle": {
     "active": true,
-    "targets": ["msi", "nsis"],
+    "targets": [
+      "msi",
+      "nsis"
+    ],
     "icon": [
       "icons/icon.png",
       "icons/icon.ico"

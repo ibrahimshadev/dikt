@@ -1,3 +1,18 @@
+# 1.0.0 (2026-02-03)
+
+
+### Bug Fixes
+
+* **ci:** add write permissions for semantic-release ([c2e2c59](https://github.com/ibrahimshadev/dikt/commit/c2e2c59732a7ae42fc6bbe3f2a1d61a2abb78baa))
+* **ui:** widen settings panel and improve input styling ([40fb48b](https://github.com/ibrahimshadev/dikt/commit/40fb48b15726d3609bf22d4c9036c40c2fd9ea4b))
+
+
+### Features
+
+* **ui:** add draggable pill and fix taskbar overlap ([a47b8f0](https://github.com/ibrahimshadev/dikt/commit/a47b8f0e73920c512bcb1ac25f05884345244081))
+* **ui:** redesign floating window as bottom-centered pill with tray ([b4f8eb7](https://github.com/ibrahimshadev/dikt/commit/b4f8eb74b70087c7afc157a9f218e0d8ba713d48))
+* **ui:** redesign pill to minimal idle state with hover expansion ([27c310a](https://github.com/ibrahimshadev/dikt/commit/27c310af43af96e8eb16d90980b63c5782fe41af))
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
