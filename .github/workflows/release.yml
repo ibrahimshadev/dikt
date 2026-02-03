@@ -47,6 +47,8 @@ jobs:
   build:
     needs: release
     if: needs.release.outputs.new_release_published == 'true'
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -103,7 +105,6 @@ jobs:
         with:
           args: ${{ matrix.args }}
           tagName: v${{ needs.release.outputs.new_release_version }}
-          releaseName: 'Dikt v${{ needs.release.outputs.new_release_version }}'
-          releaseBody: 'See the changelog for details.'
-          releaseDraft: false
-          prerelease: false
+          updater: false
+          includeRelease: true
+          includeDebug: false
