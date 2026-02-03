@@ -24,6 +24,7 @@ html, body {
   min-height: 100vh;
   padding-bottom: 8px;
   cursor: default;
+  position: relative;
 }
 
 /* Tooltip - appears above pill on hover */
@@ -234,24 +235,26 @@ html, body {
 
 /* Settings Panel */
 .settings-panel {
+  position: absolute;
+  bottom: 60px; /* Position above the pill */
+  left: 50%;
+  transform: translateX(-50%) translateY(8px) scale(0.98);
   width: 340px;
   background: rgba(24, 24, 26, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   backdrop-filter: blur(24px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-  margin-bottom: 12px;
   transform-origin: bottom center;
   /* Hidden by default */
   opacity: 0;
-  transform: translateY(8px) scale(0.98);
   pointer-events: none;
   transition: opacity 0.18s ease-out, transform 0.18s ease-out;
 }
 
 .settings-panel.visible {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateX(-50%) translateY(0) scale(1);
   pointer-events: auto;
 }
 
