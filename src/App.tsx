@@ -12,16 +12,38 @@ type DictationUpdate = {
   text?: string;
 };
 
+type Provider = 'groq' | 'openai' | 'custom';
+
 type Settings = {
+  provider: Provider;
   base_url: string;
   model: string;
   hotkey: string;
   api_key: string;
 };
 
+const PROVIDERS = {
+  groq: {
+    label: 'Groq',
+    base_url: 'https://api.groq.com/openai/v1',
+    models: ['whisper-large-v3-turbo', 'whisper-large-v3', 'distil-whisper-large-v3-en']
+  },
+  openai: {
+    label: 'OpenAI',
+    base_url: 'https://api.openai.com/v1',
+    models: ['gpt-4o-transcribe', 'gpt-4o-mini-transcribe', 'whisper-1']
+  },
+  custom: {
+    label: 'Custom',
+    base_url: '',
+    models: []
+  }
+} as const;
+
 const DEFAULT_SETTINGS: Settings = {
-  base_url: 'https://api.openai.com/v1',
-  model: 'whisper-1',
+  provider: 'groq',
+  base_url: PROVIDERS.groq.base_url,
+  model: PROVIDERS.groq.models[0],
   hotkey: 'CommandOrControl+Space',
   api_key: ''
 };
@@ -140,6 +162,7 @@ export default function App() {
   const toggleSettings = async () => {
     const expanded = !showSettings();
     setShowSettings(expanded);
+    setIsHovered(false);
     try {
       await invoke('resize_window', {
         width: expanded ? PANEL_WIDTH : 320,
@@ -212,14 +235,26 @@ export default function App() {
   });
 
   const onField = (key: keyof Settings) => (event: Event) => {
-    const target = event.target as HTMLInputElement;
+    const target = event.target as HTMLInputElement | HTMLSelectElement;
     setSettings((current) => ({ ...current, [key]: target.value }));
+  };
+
+  const onProviderChange = (event: Event) => {
+    const target = event.target as HTMLSelectElement;
+    const provider = target.value as Provider;
+    const config = PROVIDERS[provider];
+    setSettings((current) => ({
+      ...current,
+      provider,
+      base_url: config.base_url,
+      model: config.models[0] ?? ''
+    }));
   };
 
   const startDrag = async (e: MouseEvent) => {
     // Don't drag if clicking on interactive elements
     const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('input')) return;
+    if (target.closest('button') || target.closest('input') || target.closest('select')) return;
     e.preventDefault();
     await getCurrentWindow().startDragging();
   };
@@ -228,7 +263,7 @@ export default function App() {
     status() === 'recording' || status() === 'transcribing' || status() === 'pasting';
 
   return (
-    <div class="app-container" onMouseDown={startDrag}>
+    <div class="app-container">
       <Show when={showSettings()}>
         <div class="settings-panel">
           <header class="settings-header">
@@ -242,16 +277,32 @@ export default function App() {
 
           <div class="settings-content">
             <label class="field">
+              <span>Provider</span>
+              <select value={settings().provider} onChange={onProviderChange}>
+                <option value="groq">Groq</option>
+                <option value="openai">OpenAI</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label class="field">
               <span>Base URL</span>
               <input
                 value={settings().base_url}
                 onInput={onField('base_url')}
-                placeholder="https://api.openai.com/v1"
+                placeholder="https://api.groq.com/openai/v1"
               />
             </label>
             <label class="field">
               <span>Model</span>
-              <input value={settings().model} onInput={onField('model')} placeholder="whisper-1" />
+              <Show when={settings().provider !== 'custom'} fallback={
+                <input value={settings().model} onInput={onField('model')} placeholder="model-name" />
+              }>
+                <select value={settings().model} onChange={onField('model')}>
+                  {PROVIDERS[settings().provider].models.map((model) => (
+                    <option value={model}>{model}</option>
+                  ))}
+                </select>
+              </Show>
             </label>
             <label class="field">
               <span>API Key</span>
@@ -290,7 +341,7 @@ export default function App() {
       <Show when={!showSettings()}>
         {/* Tooltip - appears on hover */}
         <div class="tooltip" classList={{ visible: isHovered() && !isActive() }}>
-          <span>Click or hold <strong>{formatHotkey(settings().hotkey)}</strong> to start dictating</span>
+          <span>Hold to talk: <strong>{formatHotkey(settings().hotkey)}</strong></span>
         </div>
 
         {/* The minimal pill */}
@@ -300,6 +351,7 @@ export default function App() {
             expanded: isHovered() || isActive(),
             recording: status() === 'recording'
           }}
+          onMouseDown={startDrag}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >

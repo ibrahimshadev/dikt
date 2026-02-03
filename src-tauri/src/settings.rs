@@ -11,14 +11,21 @@ const DEFAULT_HOTKEY: &str = "CommandOrControl+Space";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppSettings {
+  pub provider: String,
   pub base_url: String,
   pub model: String,
   pub hotkey: String,
   pub api_key: String,
 }
 
+fn default_provider() -> String {
+  "groq".to_string()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct StoredSettings {
+  #[serde(default = "default_provider")]
+  provider: String,
   base_url: String,
   model: String,
   hotkey: String,
@@ -29,8 +36,9 @@ struct StoredSettings {
 impl Default for AppSettings {
   fn default() -> Self {
     Self {
-      base_url: "https://api.openai.com/v1".to_string(),
-      model: "whisper-1".to_string(),
+      provider: "groq".to_string(),
+      base_url: "https://api.groq.com/openai/v1".to_string(),
+      model: "whisper-large-v3-turbo".to_string(),
       hotkey: DEFAULT_HOTKEY.to_string(),
       api_key: String::new(),
     }
@@ -56,6 +64,7 @@ pub fn load_settings() -> AppSettings {
           }
         }
 
+        settings.provider = stored.provider;
         settings.base_url = stored.base_url;
         settings.model = stored.model;
         settings.hotkey = stored.hotkey;
@@ -72,6 +81,7 @@ pub fn load_settings() -> AppSettings {
 
 pub fn save_settings(settings: &AppSettings) -> Result<(), String> {
   let stored = StoredSettings {
+    provider: settings.provider.clone(),
     base_url: settings.base_url.clone(),
     model: settings.model.clone(),
     hotkey: settings.hotkey.clone(),
@@ -202,15 +212,17 @@ fn store_encrypted_api_key_fallback(api_key: &str) -> Result<(), String> {
   let path = settings_path()?;
   let mut stored = if let Ok(contents) = fs::read_to_string(&path) {
     serde_json::from_str::<StoredSettings>(&contents).unwrap_or_else(|_| StoredSettings {
-      base_url: "https://api.openai.com/v1".to_string(),
-      model: "whisper-1".to_string(),
+      provider: "groq".to_string(),
+      base_url: "https://api.groq.com/openai/v1".to_string(),
+      model: "whisper-large-v3-turbo".to_string(),
       hotkey: DEFAULT_HOTKEY.to_string(),
       encrypted_api_key: None,
     })
   } else {
     StoredSettings {
-      base_url: "https://api.openai.com/v1".to_string(),
-      model: "whisper-1".to_string(),
+      provider: "groq".to_string(),
+      base_url: "https://api.groq.com/openai/v1".to_string(),
+      model: "whisper-large-v3-turbo".to_string(),
       hotkey: DEFAULT_HOTKEY.to_string(),
       encrypted_api_key: None,
     }
