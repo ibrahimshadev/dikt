@@ -5,14 +5,15 @@
   "identifier": "com.dikt.app",
   "bundle": {
     "active": true,
-    "targets": [
-      "msi",
-      "nsis"
-    ],
+    "targets": ["msi", "nsis", "dmg"],
     "icon": [
       "icons/icon.png",
-      "icons/icon.ico"
-    ]
+      "icons/icon.ico",
+      "icons/icon.icns"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "10.13"
+    }
   },
   "build": {
     "beforeDevCommand": "npm run dev",
