@@ -39,9 +39,9 @@ jobs:
 
       - name: Run semantic-release
         id: semantic
+        uses: cycjimmy/semantic-release-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
 
   # Second job: Build and upload artifacts if a release was created
   build:
