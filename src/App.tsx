@@ -21,7 +21,8 @@ const DEFAULT_SETTINGS: Settings = {
 };
 
 const COLLAPSED_HEIGHT = 80;
-const EXPANDED_HEIGHT = 420;
+const EXPANDED_HEIGHT = 440;
+const PANEL_WIDTH = 360;
 
 // Format hotkey for display
 const formatHotkey = (hotkey: string): string => {
@@ -126,7 +127,7 @@ export default function App() {
     setShowSettings(expanded);
     try {
       await invoke('resize_window', {
-        width: 320,
+        width: expanded ? PANEL_WIDTH : 320,
         height: expanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT
       });
     } catch (err) {
