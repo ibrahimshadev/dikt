@@ -37,7 +37,6 @@ body {
   margin-bottom: 8px;
   font-size: 13px;
   color: #d4d4d4;
-  backdrop-filter: blur(12px);
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -54,7 +53,7 @@ body {
   color: #fff;
 }
 
-/* The minimal pill */
+/* The minimal pill - NO backdrop-filter in idle to avoid large blur rectangle */
 .pill {
   display: flex;
   align-items: center;
@@ -63,13 +62,13 @@ body {
   min-width: 56px;
   height: 12px;
   padding: 0 6px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(100, 100, 100, 0.6);
   border-radius: 10px;
-  backdrop-filter: blur(12px);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
+/* Only add blur when expanded */
 .pill.expanded {
   min-width: 160px;
   height: 36px;
@@ -77,6 +76,7 @@ body {
   background: rgba(24, 24, 24, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
+  backdrop-filter: blur(12px);
 }
 
 .pill.recording {
@@ -85,6 +85,7 @@ body {
   background: rgba(24, 24, 24, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
+  backdrop-filter: blur(12px);
 }
 
 /* Idle dots - tiny indicator */
