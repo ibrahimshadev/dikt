@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/ibrahimshadev/dikt/compare/v1.1.4...v1.1.5) (2026-02-03)
+
+
+### Bug Fixes
+
+* **settings:** fix borrow after move error in load_settings ([48edabb](https://github.com/ibrahimshadev/dikt/commit/48edabbcca359c7ee12cc38c9b0a8d3c2d08c115))
+
 ## [1.1.4](https://github.com/ibrahimshadev/dikt/compare/v1.1.3...v1.1.4) (2026-02-03)
 
 
