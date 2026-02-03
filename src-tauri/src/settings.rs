@@ -170,17 +170,15 @@ fn decrypt_api_key(encrypted: &str) -> Option<String> {
 }
 
 fn store_api_key(api_key: &str) -> Result<(), String> {
-  // Try keyring first
+  // Always store encrypted fallback (keyring may not persist on some systems like WSL)
+  store_encrypted_api_key_fallback(api_key)?;
+
+  // Also try keyring as primary storage
   if let Ok(entry) = keyring::Entry::new(SERVICE_NAME, "api-key") {
-    if entry.set_password(api_key).is_ok() {
-      // Clear any encrypted fallback if keyring succeeds
-      clear_encrypted_api_key_fallback();
-      return Ok(());
-    }
+    let _ = entry.set_password(api_key);
   }
 
-  // Fallback: store encrypted in settings file
-  store_encrypted_api_key_fallback(api_key)
+  Ok(())
 }
 
 fn get_api_key() -> Result<Option<String>, String> {
