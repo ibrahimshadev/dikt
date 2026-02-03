@@ -48,15 +48,15 @@ pub fn load_settings() -> AppSettings {
           updated = true;
         }
 
-        settings.base_url = stored.base_url;
-        settings.model = stored.model;
-        settings.hotkey = stored.hotkey;
-
         if updated {
           if let Ok(new_contents) = serde_json::to_string_pretty(&stored) {
             let _ = fs::write(&path, new_contents);
           }
         }
+
+        settings.base_url = stored.base_url;
+        settings.model = stored.model;
+        settings.hotkey = stored.hotkey;
       }
     }
   }
