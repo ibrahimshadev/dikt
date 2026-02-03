@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/ibrahimshadev/dikt/compare/v1.0.0...v1.1.0) (2026-02-03)
+
+
+### Features
+
+* **ci:** enable macOS builds and upload artifacts to releases ([5bec11d](https://github.com/ibrahimshadev/dikt/commit/5bec11d9b7d5018744c1389d537e276139eddca7))
+
 # 1.0.0 (2026-02-03)
 
 
