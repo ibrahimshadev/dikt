@@ -20,8 +20,8 @@ const DEFAULT_SETTINGS: Settings = {
   api_key: ''
 };
 
-const COLLAPSED_HEIGHT = 80;
-const EXPANDED_HEIGHT = 440;
+const COLLAPSED_HEIGHT = 100;
+const EXPANDED_HEIGHT = 480;
 const PANEL_WIDTH = 360;
 
 // Format hotkey for display
