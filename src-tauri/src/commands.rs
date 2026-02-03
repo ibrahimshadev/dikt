@@ -36,6 +36,7 @@ pub fn get_settings(state: State<'_, AppState>) -> Result<AppSettings, String> {
 
 #[tauri::command]
 pub fn save_settings(settings: AppSettings, state: State<'_, AppState>) -> Result<(), String> {
+    crate::settings::save_settings(&settings)?;
     let mut guard = state
         .settings
         .lock()
@@ -50,5 +51,13 @@ pub async fn test_connection(settings: AppSettings) -> Result<String, String> {
         return Err("Missing API key".to_string());
     }
 
-    Ok("Saved. Connection test not implemented yet.".to_string())
+    if settings.base_url.trim().is_empty() {
+        return Err("Missing base URL".to_string());
+    }
+
+    if settings.model.trim().is_empty() {
+        return Err("Missing model".to_string());
+    }
+
+    Ok("Settings look valid.".to_string())
 }

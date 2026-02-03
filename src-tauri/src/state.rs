@@ -12,7 +12,7 @@ impl Default for AppState {
     fn default() -> Self {
         Self {
             recorder: AudioRecorder::default(),
-            settings: Mutex::new(AppSettings::default()),
+            settings: Mutex::new(crate::settings::load_settings()),
         }
     }
 }

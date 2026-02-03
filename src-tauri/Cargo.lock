@@ -723,6 +723,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "dikt"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "cpal",
+ "enigo",
+ "hound",
+ "keyring",
+ "once_cell",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-global-shortcut",
+ "tokio",
+]
+
+[[package]]
 name = "dirs"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3778,25 +3797,6 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
-]
-
-[[package]]
-name = "shaflow"
-version = "0.1.0"
-dependencies = [
- "arboard",
- "cpal",
- "enigo",
- "hound",
- "keyring",
- "once_cell",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-global-shortcut",
- "tokio",
 ]
 
 [[package]]

@@ -31,6 +31,17 @@ body {
   font-size: 14px;
 }
 
+.status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stack {
+  display: grid;
+  gap: 6px;
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -43,6 +54,58 @@ body {
 
 .error {
   color: #ff6b6b;
+}
+
+.warning {
+  color: #f5c451;
+}
+
+.settings {
+  display: grid;
+  gap: 12px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: #cfcfcf;
+}
+
+input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #19d0e8;
+  color: #0b0b0b;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button.ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 .dot {

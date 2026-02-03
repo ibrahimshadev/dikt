@@ -15,12 +15,13 @@ jobs:
         include:
           - platform: windows-latest
             args: '--target x86_64-pc-windows-msvc'
-          - platform: macos-latest
-            args: '--target aarch64-apple-darwin'
-          - platform: macos-latest
-            args: '--target x86_64-apple-darwin'
-          - platform: ubuntu-22.04
-            args: ''
+          # Uncomment these for full cross-platform builds:
+          # - platform: macos-latest
+          #   args: '--target aarch64-apple-darwin'
+          # - platform: macos-latest
+          #   args: '--target x86_64-apple-darwin'
+          # - platform: ubuntu-22.04
+          #   args: ''
 
     runs-on: ${{ matrix.platform }}
 
@@ -41,17 +42,17 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      - name: Install Linux dependencies
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            libayatana-appindicator3-dev \
-            librsvg2-dev \
-            libssl-dev \
-            libxdo-dev \
-            patchelf
+      # - name: Install Linux dependencies
+      #   if: matrix.platform == 'ubuntu-22.04'
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y \
+      #       libwebkit2gtk-4.1-dev \
+      #       libayatana-appindicator3-dev \
+      #       librsvg2-dev \
+      #       libssl-dev \
+      #       libxdo-dev \
+      #       patchelf
 
       - name: Install dependencies
         run: npm ci
@@ -72,25 +73,25 @@ jobs:
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
 
-      - name: Upload artifacts (macOS x64)
-        if: matrix.platform == 'macos-latest' && contains(matrix.args, 'x86_64')
-        uses: actions/upload-artifact@v4
-        with:
-          name: dikt-macos-x64
-          path: src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
+      # - name: Upload artifacts (macOS x64)
+      #   if: matrix.platform == 'macos-latest' && contains(matrix.args, 'x86_64')
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: dikt-macos-x64
+      #     path: src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
 
-      - name: Upload artifacts (macOS ARM)
-        if: matrix.platform == 'macos-latest' && contains(matrix.args, 'aarch64')
-        uses: actions/upload-artifact@v4
-        with:
-          name: dikt-macos-arm64
-          path: src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+      # - name: Upload artifacts (macOS ARM)
+      #   if: matrix.platform == 'macos-latest' && contains(matrix.args, 'aarch64')
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: dikt-macos-arm64
+      #     path: src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
 
-      - name: Upload artifacts (Linux)
-        if: matrix.platform == 'ubuntu-22.04'
-        uses: actions/upload-artifact@v4
-        with:
-          name: dikt-linux-x64
-          path: |
-            src-tauri/target/release/bundle/deb/*.deb
-            src-tauri/target/release/bundle/appimage/*.AppImage
+      # - name: Upload artifacts (Linux)
+      #   if: matrix.platform == 'ubuntu-22.04'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: dikt-linux-x64
+      #     path: |
+      #       src-tauri/target/release/bundle/deb/*.deb
+      #       src-tauri/target/release/bundle/appimage/*.AppImage
