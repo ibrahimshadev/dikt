@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/ibrahimshadev/dikt/compare/v1.3.1...v1.4.0) (2026-02-03)
+
+
+### Bug Fixes
+
+* **ui:** increase expanded height to show buttons and pill ([190487a](https://github.com/ibrahimshadev/dikt/commit/190487ab1e797462f93aac95bcdd8ad9a4053633))
+
+
+### Features
+
+* **ui:** add closing animation to settings panel ([5db1de3](https://github.com/ibrahimshadev/dikt/commit/5db1de3146b0cb768f3d49ea3f40b3b7fb61abd1))
+
 ## [1.3.1](https://github.com/ibrahimshadev/dikt/compare/v1.3.0...v1.3.1) (2026-02-03)
 
 
