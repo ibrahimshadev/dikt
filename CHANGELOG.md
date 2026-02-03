@@ -1,3 +1,10 @@
+## [1.1.6](https://github.com/ibrahimshadev/dikt/compare/v1.1.5...v1.1.6) (2026-02-03)
+
+
+### Bug Fixes
+
+* **ui:** increase window height to prevent content clipping ([4d6b42d](https://github.com/ibrahimshadev/dikt/commit/4d6b42dbf71566c7ae9a29df1336b6d0719ed88e))
+
 ## [1.1.5](https://github.com/ibrahimshadev/dikt/compare/v1.1.4...v1.1.5) (2026-02-03)
 
 
