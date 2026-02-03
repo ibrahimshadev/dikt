@@ -49,7 +49,7 @@ const DEFAULT_SETTINGS: Settings = {
 };
 
 const COLLAPSED_HEIGHT = 100;
-const EXPANDED_HEIGHT = 480;
+const EXPANDED_HEIGHT = 540;
 const PANEL_WIDTH = 360;
 
 // Format hotkey for display
