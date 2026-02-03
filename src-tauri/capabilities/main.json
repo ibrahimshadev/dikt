@@ -1,0 +1,10 @@
+{
+  "identifier": "main",
+  "description": "Main capability",
+  "windows": ["main"],
+  "permissions": [
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister",
+    "global-shortcut:allow-is-registered"
+  ]
+}
