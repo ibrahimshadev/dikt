@@ -1,3 +1,10 @@
+## [1.1.8](https://github.com/ibrahimshadev/dikt/compare/v1.1.7...v1.1.8) (2026-02-03)
+
+
+### Bug Fixes
+
+* **ci:** run build workflow on push and fix Win32 API cal ([67396d8](https://github.com/ibrahimshadev/dikt/commit/67396d8d9c4ddbdec8008d84e76520411f2a06ca))
+
 ## [1.1.7](https://github.com/ibrahimshadev/dikt/compare/v1.1.6...v1.1.7) (2026-02-03)
 
 
