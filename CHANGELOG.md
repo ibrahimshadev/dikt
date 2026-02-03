@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/ibrahimshadev/dikt/compare/v1.1.10...v1.2.0) (2026-02-03)
+
+
+### Features
+
+* **settings:** add provider presets and model selector ([e35b9cc](https://github.com/ibrahimshadev/dikt/commit/e35b9cc47c05dacb6ed82f4f73a9a079905923c6))
+
 ## [1.1.10](https://github.com/ibrahimshadev/dikt/compare/v1.1.9...v1.1.10) (2026-02-03)
 
 
