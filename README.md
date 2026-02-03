@@ -8,7 +8,9 @@ A minimalist, cross-platform voice-to-text application. Hold a hotkey, speak, an
 - **Auto-paste**: Transcribed text is automatically pasted into the focused input
 - **Cloud transcription**: Uses OpenAI-compatible APIs (Groq free tier, OpenAI, or custom)
 - **Floating overlay**: Minimal glassmorphism UI shows recording/transcribing status
-- **Cross-platform**: Windows, macOS, Linux
+- **System tray**: Minimize to tray with quick access to settings
+- **Customizable hotkey**: Configure your preferred key combination in settings
+- **Cross-platform**: Windows (tested), macOS/Linux (experimental)
 
 ## Quick Start
 
@@ -107,11 +109,19 @@ dikt/
 │   │   ├── transcribe.rs   # API client
 │   │   ├── clipboard.rs    # Paste simulation
 │   │   ├── settings.rs     # Configuration
-│   │   └── commands.rs     # Tauri commands
+│   │   ├── commands.rs     # Tauri commands
+│   │   ├── state.rs        # App state management
+│   │   └── domain/         # Domain layer (hexagonal architecture)
+│   │       ├── types.rs    # State machine types
+│   │       ├── ports.rs    # Trait definitions (Recorder, Transcriber, etc.)
+│   │       ├── impls.rs    # Implementations
+│   │       ├── manager.rs  # Session orchestration
+│   │       └── tests.rs    # Domain tests
 │   ├── Cargo.toml
 │   └── tauri.conf.json
-├── PRD.md                  # Product requirements
-└── research.md             # Technical research
+└── docs/
+    ├── PRD.md              # Product requirements
+    └── research.md         # Technical research
 ```
 
 ## License
