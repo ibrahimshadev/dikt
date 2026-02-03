@@ -1,6 +1,7 @@
-import { createSignal, onCleanup, onMount } from 'solid-js';
+import { createSignal, onCleanup, onMount, Show, For } from 'solid-js';
 import { register, unregister } from '@tauri-apps/plugin-global-shortcut';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 
 type Status = 'idle' | 'recording' | 'transcribing' | 'done' | 'error';
 
@@ -14,8 +15,21 @@ type Settings = {
 const DEFAULT_SETTINGS: Settings = {
   base_url: 'https://api.openai.com/v1',
   model: 'whisper-1',
-  hotkey: 'CommandOrControl+Shift+Space',
+  hotkey: 'Control+Super',
   api_key: ''
+};
+
+const PILL_HEIGHT = 48;
+const EXPANDED_HEIGHT = 380;
+
+// Format hotkey for display
+const formatHotkey = (hotkey: string): string => {
+  return hotkey
+    .replace('Control+Super', 'Ctrl+Win')
+    .replace('CommandOrControl', 'Ctrl')
+    .replace('Control', 'Ctrl')
+    .replace('Super', 'Win')
+    .replace(/\+/g, ' + ');
 };
 
 export default function App() {
@@ -23,6 +37,7 @@ export default function App() {
   const [text, setText] = createSignal('');
   const [error, setError] = createSignal('');
   const [showSettings, setShowSettings] = createSignal(false);
+  const [isHovered, setIsHovered] = createSignal(false);
   const [settings, setSettings] = createSignal<Settings>(DEFAULT_SETTINGS);
   const [testMessage, setTestMessage] = createSignal('');
   const [saving, setSaving] = createSignal(false);
@@ -87,7 +102,7 @@ export default function App() {
       await invoke('save_settings', { settings: settings() });
       await registerHotkey(settings().hotkey);
       setTestMessage('Settings saved.');
-      setShowSettings(false);
+      await toggleSettings();
     } catch (err) {
       setTestMessage(String(err));
     } finally {
@@ -105,8 +120,32 @@ export default function App() {
     }
   };
 
-  onMount(() => {
-    void loadSettings();
+  const toggleSettings = async () => {
+    const expanded = !showSettings();
+    setShowSettings(expanded);
+    try {
+      await invoke('resize_window', {
+        width: 200,
+        height: expanded ? EXPANDED_HEIGHT : PILL_HEIGHT
+      });
+    } catch (err) {
+      console.error('Failed to resize window:', err);
+    }
+  };
+
+  onMount(async () => {
+    await loadSettings();
+
+    // Listen for tray settings event
+    const unlisten = await listen('show-settings', async () => {
+      if (!showSettings()) {
+        await toggleSettings();
+      }
+    });
+
+    onCleanup(() => {
+      void unlisten();
+    });
   });
 
   onCleanup(() => {
@@ -119,11 +158,19 @@ export default function App() {
   };
 
   return (
-    <div class="overlay">
-      <div class="card">
-        {showSettings() ? (
-          <div class="settings">
-            <div class="title">Settings</div>
+    <div class="pill-container">
+      <Show when={showSettings()}>
+        <div class="settings-panel">
+          <header class="settings-header">
+            <span class="settings-title">Settings</span>
+            <button class="collapse-button" onClick={toggleSettings} title="Collapse">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+          </header>
+
+          <div class="settings-content">
             <label class="field">
               <span>Base URL</span>
               <input
@@ -149,11 +196,16 @@ export default function App() {
               <span>Hotkey</span>
               <input value={settings().hotkey} onInput={onField('hotkey')} />
             </label>
-            {testMessage() && <div class="muted">{testMessage()}</div>}
+
+            <Show when={!settings().api_key}>
+              <div class="warning">Missing API key</div>
+            </Show>
+
+            <Show when={testMessage()}>
+              <div class="muted">{testMessage()}</div>
+            </Show>
+
             <div class="actions">
-              <button class="button ghost" onClick={() => setShowSettings(false)}>
-                Cancel
-              </button>
               <button class="button ghost" onClick={testConnection}>
                 Test
               </button>
@@ -162,30 +214,53 @@ export default function App() {
               </button>
             </div>
           </div>
-        ) : (
-          <div class="status">
-            {status() === 'idle' && (
-              <div class="stack">
-                <div class="muted">Hold {settings().hotkey} to talk</div>
-                {!settings().api_key && (
-                  <div class="warning">Missing API key. Open Settings.</div>
-                )}
-              </div>
-            )}
-            {status() === 'recording' && (
-              <div class="row">
-                <span class="dot" />
-                <span>Recording...</span>
-              </div>
-            )}
-            {status() === 'transcribing' && <div class="row">Transcribing...</div>}
-            {status() === 'done' && <div class="row">{text() || 'Done'}</div>}
-            {status() === 'error' && <div class="error">{error() || 'Error'}</div>}
-            <button class="button ghost" onClick={() => setShowSettings(true)}>
-              Settings
-            </button>
+        </div>
+      </Show>
+
+      <div
+        class="pill"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <Show when={status() === 'idle' && !showSettings()}>
+          <span class="hotkey-text">{formatHotkey(settings().hotkey)}</span>
+        </Show>
+
+        <Show when={status() === 'recording'}>
+          <div class="wave-bars">
+            <For each={[0, 1, 2, 3, 4]}>
+              {(i) => <div class="wave-bar" style={{ "animation-delay": `${i * 0.1}s` }} />}
+            </For>
           </div>
-        )}
+        </Show>
+
+        <Show when={status() === 'transcribing'}>
+          <span class="status-text">...</span>
+        </Show>
+
+        <Show when={status() === 'done'}>
+          <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </Show>
+
+        <Show when={status() === 'error'}>
+          <span class="error-text" title={error()}>!</span>
+        </Show>
+
+        <Show when={!showSettings()}>
+          <button
+            class="gear-button"
+            classList={{ visible: isHovered() }}
+            onClick={toggleSettings}
+            title="Settings"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </button>
+        </Show>
       </div>
     </div>
   );

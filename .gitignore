@@ -46,6 +46,7 @@ out/
 .env.test.local
 .env.production.local
 *.env
+.mcp.json
 
 # =============================================================================
 # Logs

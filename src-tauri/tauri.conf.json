@@ -19,17 +19,22 @@
   },
   "app": {
     "withGlobalTauri": true,
+    "trayIcon": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    },
     "windows": [
       {
         "label": "main",
         "title": "Dikt",
-        "width": 420,
-        "height": 120,
+        "width": 200,
+        "height": 48,
         "resizable": false,
         "decorations": false,
         "transparent": true,
         "alwaysOnTop": true,
-        "skipTaskbar": true
+        "skipTaskbar": true,
+        "center": false
       }
     ]
   }
