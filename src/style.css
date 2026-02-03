@@ -242,7 +242,17 @@ html, body {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   margin-bottom: 12px;
   transform-origin: bottom center;
-  animation: panelIn 0.18s ease-out;
+  /* Hidden by default */
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+}
+
+.settings-panel.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
 .settings-header {
@@ -283,17 +293,6 @@ html, body {
   flex-direction: column;
   gap: 14px;
   padding: 16px 20px 20px;
-}
-
-@keyframes panelIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 /* Form Fields */

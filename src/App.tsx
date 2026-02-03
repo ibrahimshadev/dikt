@@ -264,8 +264,7 @@ export default function App() {
 
   return (
     <div class="app-container">
-      <Show when={showSettings()}>
-        <div class="settings-panel">
+      <div class="settings-panel" classList={{ visible: showSettings() }}>
           <header class="settings-header">
             <span class="settings-title">Settings</span>
             <button class="collapse-button" onClick={toggleSettings} title="Collapse">
@@ -336,7 +335,6 @@ export default function App() {
             </div>
           </div>
         </div>
-      </Show>
 
       <Show when={!showSettings()}>
         {/* Tooltip - appears on hover */}
