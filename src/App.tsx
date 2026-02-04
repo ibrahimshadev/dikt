@@ -22,11 +22,14 @@ type VocabularyEntry = {
   enabled: boolean;
 };
 
+type HotkeyMode = 'hold' | 'lock';
+
 type Settings = {
   provider: Provider;
   base_url: string;
   model: string;
   hotkey: string;
+  hotkey_mode: HotkeyMode;
   api_key: string;
   vocabulary: VocabularyEntry[];
 };
@@ -54,6 +57,7 @@ const DEFAULT_SETTINGS: Settings = {
   base_url: PROVIDERS.groq.base_url,
   model: PROVIDERS.groq.models[0],
   hotkey: 'CommandOrControl+Space',
+  hotkey_mode: 'hold',
   api_key: '',
   vocabulary: []
 };
@@ -138,20 +142,54 @@ export default function App() {
   };
 
   const handlePressed = async () => {
-    if (isHolding || status() === 'recording') return;
-    isHolding = true;
-    setError('');
-    setStatus('recording');
-    try {
-      await invoke('start_recording');
-    } catch (err) {
-      isHolding = false;
-      setStatus('error');
-      setError(String(err));
+    if (settings().hotkey_mode === 'hold') {
+      // Hold mode: start recording on press
+      if (isHolding || status() === 'recording') return;
+      isHolding = true;
+      setError('');
+      setStatus('recording');
+      try {
+        await invoke('start_recording');
+      } catch (err) {
+        isHolding = false;
+        setStatus('error');
+        setError(String(err));
+      }
+    } else {
+      // Lock mode: toggle recording on each press
+      if (status() === 'recording') {
+        // Second press: stop recording
+        setStatus('transcribing');
+        try {
+          const result = (await invoke<string>('stop_and_transcribe')) ?? '';
+          if (result) setText(result);
+          if (status() !== 'error') {
+            setStatus('done');
+            setTimeout(() => {
+              if (status() === 'done') setStatus('idle');
+            }, 1500);
+          }
+        } catch (err) {
+          setStatus('error');
+          setError(String(err));
+        }
+      } else if (status() === 'idle' || status() === 'done' || status() === 'error') {
+        // First press: start recording
+        setError('');
+        setStatus('recording');
+        try {
+          await invoke('start_recording');
+        } catch (err) {
+          setStatus('error');
+          setError(String(err));
+        }
+      }
     }
   };
 
   const handleReleased = async () => {
+    // Only act on release in hold mode
+    if (settings().hotkey_mode !== 'hold') return;
     if (!isHolding) return;
     isHolding = false;
     setStatus('transcribing');
@@ -329,7 +367,7 @@ export default function App() {
     void unregister(registeredHotkey);
   });
 
-  const onField = (key: 'base_url' | 'model' | 'hotkey' | 'api_key') => (event: Event) => {
+  const onField = (key: 'base_url' | 'model' | 'hotkey' | 'hotkey_mode' | 'api_key') => (event: Event) => {
     const target = event.target as HTMLInputElement | HTMLSelectElement;
     setSettings((current) => ({ ...current, [key]: target.value }));
   };
@@ -532,6 +570,13 @@ export default function App() {
             <span>Hotkey</span>
             <input value={settings().hotkey} onInput={onField('hotkey')} />
           </label>
+          <label class="field">
+            <span>Mode</span>
+            <select value={settings().hotkey_mode} onChange={onField('hotkey_mode')}>
+              <option value="hold">Hold to talk</option>
+              <option value="lock">Press to toggle</option>
+            </select>
+          </label>
 
           <Show when={!settings().api_key}>
             <div class="warning">Missing API key</div>
@@ -647,7 +692,8 @@ export default function App() {
       <Show when={!showSettings()}>
         <div class="tooltip" classList={{ visible: isHovered() && !isActive() }}>
           <span>
-            Hold to talk: <strong>{formatHotkey(settings().hotkey)}</strong>
+            {settings().hotkey_mode === 'hold' ? 'Hold to talk: ' : 'Press to toggle: '}
+            <strong>{formatHotkey(settings().hotkey)}</strong>
           </span>
         </div>
       </Show>

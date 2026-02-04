@@ -17,6 +17,8 @@ pub struct AppSettings {
   pub base_url: String,
   pub model: String,
   pub hotkey: String,
+  #[serde(default = "default_hotkey_mode")]
+  pub hotkey_mode: String,
   pub api_key: String,
   #[serde(default)]
   pub vocabulary: Vec<VocabularyEntry>,
@@ -26,6 +28,10 @@ fn default_provider() -> String {
   "groq".to_string()
 }
 
+fn default_hotkey_mode() -> String {
+  "hold".to_string()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct StoredSettings {
   #[serde(default = "default_provider")]
@@ -33,6 +39,8 @@ struct StoredSettings {
   base_url: String,
   model: String,
   hotkey: String,
+  #[serde(default = "default_hotkey_mode")]
+  hotkey_mode: String,
   #[serde(default)]
   encrypted_api_key: Option<String>,
   #[serde(default)]
@@ -46,6 +54,7 @@ impl Default for AppSettings {
       base_url: "https://api.groq.com/openai/v1".to_string(),
       model: "whisper-large-v3-turbo".to_string(),
       hotkey: DEFAULT_HOTKEY.to_string(),
+      hotkey_mode: "hold".to_string(),
       api_key: String::new(),
       vocabulary: Vec::new(),
     }
@@ -75,6 +84,7 @@ pub fn load_settings() -> AppSettings {
         settings.base_url = stored.base_url;
         settings.model = stored.model;
         settings.hotkey = stored.hotkey;
+        settings.hotkey_mode = stored.hotkey_mode;
         settings.vocabulary = stored.vocabulary;
       }
     }
@@ -93,6 +103,7 @@ pub fn save_settings(settings: &AppSettings) -> Result<(), String> {
     base_url: settings.base_url.clone(),
     model: settings.model.clone(),
     hotkey: settings.hotkey.clone(),
+    hotkey_mode: settings.hotkey_mode.clone(),
     encrypted_api_key: None,
     vocabulary: settings.vocabulary.clone(),
   };
@@ -223,6 +234,7 @@ fn store_encrypted_api_key_fallback(api_key: &str) -> Result<(), String> {
       base_url: "https://api.groq.com/openai/v1".to_string(),
       model: "whisper-large-v3-turbo".to_string(),
       hotkey: DEFAULT_HOTKEY.to_string(),
+      hotkey_mode: "hold".to_string(),
       encrypted_api_key: None,
       vocabulary: Vec::new(),
     })
@@ -232,6 +244,7 @@ fn store_encrypted_api_key_fallback(api_key: &str) -> Result<(), String> {
       base_url: "https://api.groq.com/openai/v1".to_string(),
       model: "whisper-large-v3-turbo".to_string(),
       hotkey: DEFAULT_HOTKEY.to_string(),
+      hotkey_mode: "hold".to_string(),
       encrypted_api_key: None,
       vocabulary: Vec::new(),
     }
