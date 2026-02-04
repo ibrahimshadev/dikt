@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/ibrahimshadev/dikt/compare/v1.7.0...v1.8.0) (2026-02-04)
+
+
+### Features
+
+* **ui:** tighten idle pill ([2b54e6f](https://github.com/ibrahimshadev/dikt/commit/2b54e6fb187cf7c6100435c5fc9dafa891a2cd21))
+
 # [1.7.0](https://github.com/ibrahimshadev/dikt/compare/v1.6.0...v1.7.0) (2026-02-04)
 
 
