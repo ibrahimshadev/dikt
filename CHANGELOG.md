@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/ibrahimshadev/dikt/compare/v1.9.0...v1.10.0) (2026-02-04)
+
+
+### Features
+
+* **ui:** replace WaveBars with SiriWave animation for recording state ([f1cbeee](https://github.com/ibrahimshadev/dikt/commit/f1cbeeed2b7e0dfcf52ffd180b9b2d51fbc6173e))
+
 # [1.9.0](https://github.com/ibrahimshadev/dikt/compare/v1.8.0...v1.9.0) (2026-02-04)
 
 
