@@ -27,7 +27,7 @@ html, body {
   position: relative;
 }
 
-/* Tooltip - appears above pill on hover */
+/* Tooltip - appears above pill on hover (animated by solid-motionone) */
 .tooltip {
   background: rgba(24, 24, 24, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -36,16 +36,12 @@ html, body {
   margin-bottom: 8px;
   font-size: 13px;
   color: #d4d4d4;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: none;
   white-space: nowrap;
 }
 
 .tooltip.visible {
-  opacity: 1;
-  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .tooltip strong {
@@ -236,27 +232,22 @@ html, body {
   font-weight: bold;
 }
 
-/* Settings Panel */
+/* Settings Panel (animated by solid-motionone) */
 .settings-panel {
   position: absolute;
   bottom: 48px; /* Position above the pill */
-  left: 50%;
-  transform: translateX(-50%) translateY(8px) scale(0.98);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   width: 320px;
   background: rgba(28, 28, 30, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   backdrop-filter: blur(24px);
   transform-origin: bottom center;
-  /* Hidden by default */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
 }
 
 .settings-panel.visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0) scale(1);
   pointer-events: auto;
 }
 
@@ -332,9 +323,7 @@ html, body {
   min-height: 280px;
 }
 
-.tab-content.hidden {
-  display: none;
-}
+/* Tab content animated by solid-motionone Presence */
 
 /* Form Fields */
 .field {
