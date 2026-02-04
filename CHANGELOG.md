@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/ibrahimshadev/dikt/compare/v1.6.0...v1.7.0) (2026-02-04)
+
+
+### Features
+
+* **settings:** add hold vs lock recording mode toggle ([94c1e17](https://github.com/ibrahimshadev/dikt/commit/94c1e1780429a33aa6c3f8d78018540ab45116bd))
+
 # [1.6.0](https://github.com/ibrahimshadev/dikt/compare/v1.5.0...v1.6.0) (2026-02-04)
 
 
