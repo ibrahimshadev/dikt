@@ -244,7 +244,6 @@ html, body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   backdrop-filter: blur(24px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   transform-origin: bottom center;
   /* Hidden by default */
   opacity: 0;

@@ -49,8 +49,8 @@ const DEFAULT_SETTINGS: Settings = {
 };
 
 const COLLAPSED_HEIGHT = 100;
-const EXPANDED_HEIGHT = 580;
 const PANEL_WIDTH = 360;
+const SETTINGS_PANEL_BOTTOM_OFFSET = 48; // Space for pill + padding
 
 // Format hotkey for display
 const formatHotkey = (hotkey: string): string => {
@@ -73,6 +73,7 @@ export default function App() {
   const [saving, setSaving] = createSignal(false);
   let isHolding = false;
   let registeredHotkey = DEFAULT_SETTINGS.hotkey;
+  let settingsPanelRef: HTMLDivElement | undefined;
 
   const registerHotkey = async (hotkey: string) => {
     if (registeredHotkey) {
@@ -157,24 +158,62 @@ export default function App() {
     } catch (err) {
       setTestMessage(String(err));
     }
+    // Resize window if content height changed
+    if (showSettings()) {
+      await resizeWindowToFitSettings();
+    }
   };
 
-  const toggleSettings = async () => {
-    const expanded = !showSettings();
-    setShowSettings(expanded);
-    setIsHovered(false);
+  const resizeWindowToFitSettings = async () => {
+    if (!settingsPanelRef) return;
+    // Wait for DOM to update
+    await new Promise(resolve => setTimeout(resolve, 10));
+    const panelHeight = settingsPanelRef.offsetHeight;
+    const windowHeight = panelHeight + SETTINGS_PANEL_BOTTOM_OFFSET;
     try {
       await invoke('resize_window', {
-        width: expanded ? PANEL_WIDTH : 320,
-        height: expanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT
+        width: PANEL_WIDTH,
+        height: windowHeight
       });
     } catch (err) {
       console.error('Failed to resize window:', err);
     }
   };
 
+  const toggleSettings = async () => {
+    const expanded = !showSettings();
+    setShowSettings(expanded);
+    setIsHovered(false);
+    if (expanded) {
+      // Resize after settings panel renders
+      await resizeWindowToFitSettings();
+    } else {
+      // Wait for CSS transition to complete before resizing window
+      await new Promise(resolve => setTimeout(resolve, 200));
+      try {
+        await invoke('resize_window', {
+          width: 320,
+          height: COLLAPSED_HEIGHT
+        });
+      } catch (err) {
+        console.error('Failed to resize window:', err);
+      }
+    }
+  };
+
   onMount(async () => {
     await loadSettings();
+
+    // Watch for settings panel size changes
+    let resizeObserver: ResizeObserver | undefined;
+    if (settingsPanelRef) {
+      resizeObserver = new ResizeObserver(() => {
+        if (showSettings()) {
+          void resizeWindowToFitSettings();
+        }
+      });
+      resizeObserver.observe(settingsPanelRef);
+    }
 
     // Listen for tray settings event
     const unlisten = await listen('show-settings', async () => {
@@ -227,6 +266,7 @@ export default function App() {
     onCleanup(() => {
       void unlisten();
       void unlistenDictation();
+      resizeObserver?.disconnect();
     });
   });
 
@@ -264,7 +304,7 @@ export default function App() {
 
   return (
     <div class="app-container">
-      <div class="settings-panel" classList={{ visible: showSettings() }}>
+      <div ref={settingsPanelRef} class="settings-panel" classList={{ visible: showSettings() }}>
           <header class="settings-header">
             <span class="settings-title">Settings</span>
             <button class="collapse-button" onClick={toggleSettings} title="Collapse">
