@@ -2,7 +2,7 @@ import { Show } from 'solid-js';
 import type { Accessor } from 'solid-js';
 import type { Status, Settings } from '../../types';
 import IdleDots from './IdleDots';
-import WaveBars from './WaveBars';
+import SineWaves from './SineWaves';
 import LoadingDots from './LoadingDots';
 import GearButton from './GearButton';
 
@@ -53,7 +53,7 @@ export default function Pill(props: PillProps) {
       </Show>
 
       <Show when={props.status() === 'recording'}>
-        <WaveBars />
+        <SineWaves />
       </Show>
 
       <Show when={props.status() === 'transcribing' || props.status() === 'pasting'}>
