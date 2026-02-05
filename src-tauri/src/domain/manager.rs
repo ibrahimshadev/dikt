@@ -139,6 +139,11 @@ impl DictationSessionManager {
       on_update(DictationUpdate::new(DictationState::Pasting));
 
       self.paster.paste(&text)?;
+      if settings.copy_to_clipboard_on_success {
+        if let Err(copy_err) = self.paster.copy(&text) {
+          eprintln!("Failed to copy transcript to clipboard: {copy_err}");
+        }
+      }
 
       {
         let _ = self.set_state(DictationState::Done);

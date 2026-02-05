@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS: Settings = {
   model: PROVIDERS.groq.models[0],
   hotkey: 'CommandOrControl+Space',
   hotkey_mode: 'hold',
+  copy_to_clipboard_on_success: false,
   api_key: '',
   vocabulary: []
 };

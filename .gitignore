@@ -114,3 +114,8 @@ vite.config.ts.timestamp-*
 .aider*
 TODO.md
 debug.log
+
+# Local sibling projects
+whipering-project/
+whispering-project/
+competitive-analysis.md

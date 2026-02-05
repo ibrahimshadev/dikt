@@ -231,6 +231,21 @@ body.window-settings {
   margin: 0;
   width: 320px;
   max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.window-settings-root .settings-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.window-settings-root .settings-tab-pane {
+  height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -239,6 +254,7 @@ body.window-settings {
   min-height: 0;
   flex: 1;
   overflow-y: auto;
+  padding-bottom: 18px;
 }
 
 .settings-header {

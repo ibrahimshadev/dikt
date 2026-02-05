@@ -4,8 +4,20 @@ use std::time::Duration;
 use arboard::Clipboard;
 use enigo::{Direction::{Click, Press, Release}, Enigo, Key, Keyboard, Settings};
 
-pub fn copy_and_paste(text: &str) -> Result<(), String> {
+pub fn copy_to_clipboard(text: &str) -> Result<(), String> {
   let mut clipboard = Clipboard::new().map_err(|e| e.to_string())?;
+  clipboard.set_text(text).map_err(|e| e.to_string())?;
+  Ok(())
+}
+
+pub fn copy_and_paste(text: &str, restore_clipboard: bool) -> Result<(), String> {
+  let mut clipboard = Clipboard::new().map_err(|e| e.to_string())?;
+  let original_clipboard = if restore_clipboard {
+    clipboard.get_text().ok()
+  } else {
+    None
+  };
+
   clipboard.set_text(text).map_err(|e| e.to_string())?;
 
   thread::sleep(Duration::from_millis(50));
@@ -15,6 +27,11 @@ pub fn copy_and_paste(text: &str) -> Result<(), String> {
   enigo.key(modifier, Press).map_err(|e| e.to_string())?;
   enigo.key(Key::Unicode('v'), Click).map_err(|e| e.to_string())?;
   enigo.key(modifier, Release).map_err(|e| e.to_string())?;
+
+  if let Some(original_text) = original_clipboard {
+    thread::sleep(Duration::from_millis(50));
+    clipboard.set_text(original_text).map_err(|e| e.to_string())?;
+  }
 
   Ok(())
 }

@@ -19,6 +19,8 @@ pub struct AppSettings {
   pub hotkey: String,
   #[serde(default = "default_hotkey_mode")]
   pub hotkey_mode: String,
+  #[serde(default = "default_copy_to_clipboard_on_success")]
+  pub copy_to_clipboard_on_success: bool,
   pub api_key: String,
   #[serde(default)]
   pub vocabulary: Vec<VocabularyEntry>,
@@ -32,6 +34,10 @@ fn default_hotkey_mode() -> String {
   "hold".to_string()
 }
 
+fn default_copy_to_clipboard_on_success() -> bool {
+  false
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct StoredSettings {
   #[serde(default = "default_provider")]
@@ -41,6 +47,8 @@ struct StoredSettings {
   hotkey: String,
   #[serde(default = "default_hotkey_mode")]
   hotkey_mode: String,
+  #[serde(default = "default_copy_to_clipboard_on_success")]
+  copy_to_clipboard_on_success: bool,
   #[serde(default)]
   encrypted_api_key: Option<String>,
   #[serde(default)]
@@ -55,6 +63,7 @@ impl Default for AppSettings {
       model: "whisper-large-v3-turbo".to_string(),
       hotkey: DEFAULT_HOTKEY.to_string(),
       hotkey_mode: "hold".to_string(),
+      copy_to_clipboard_on_success: false,
       api_key: String::new(),
       vocabulary: Vec::new(),
     }
@@ -85,6 +94,7 @@ pub fn load_settings() -> AppSettings {
         settings.model = stored.model;
         settings.hotkey = stored.hotkey;
         settings.hotkey_mode = stored.hotkey_mode;
+        settings.copy_to_clipboard_on_success = stored.copy_to_clipboard_on_success;
         settings.vocabulary = stored.vocabulary;
       }
     }
@@ -104,6 +114,7 @@ pub fn save_settings(settings: &AppSettings) -> Result<(), String> {
     model: settings.model.clone(),
     hotkey: settings.hotkey.clone(),
     hotkey_mode: settings.hotkey_mode.clone(),
+    copy_to_clipboard_on_success: settings.copy_to_clipboard_on_success,
     encrypted_api_key: None,
     vocabulary: settings.vocabulary.clone(),
   };
@@ -235,6 +246,7 @@ fn store_encrypted_api_key_fallback(api_key: &str) -> Result<(), String> {
       model: "whisper-large-v3-turbo".to_string(),
       hotkey: DEFAULT_HOTKEY.to_string(),
       hotkey_mode: "hold".to_string(),
+      copy_to_clipboard_on_success: false,
       encrypted_api_key: None,
       vocabulary: Vec::new(),
     })
@@ -245,6 +257,7 @@ fn store_encrypted_api_key_fallback(api_key: &str) -> Result<(), String> {
       model: "whisper-large-v3-turbo".to_string(),
       hotkey: DEFAULT_HOTKEY.to_string(),
       hotkey_mode: "hold".to_string(),
+      copy_to_clipboard_on_success: false,
       encrypted_api_key: None,
       vocabulary: Vec::new(),
     }

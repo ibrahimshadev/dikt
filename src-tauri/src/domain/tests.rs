@@ -132,7 +132,9 @@ impl Transcriber for MockTranscriber {
 
 struct MockPaster {
   paste_called: AtomicUsize,
+  copy_called: AtomicUsize,
   last_text: Mutex<String>,
+  last_copied_text: Mutex<String>,
   should_fail: AtomicBool,
 }
 
@@ -140,7 +142,9 @@ impl MockPaster {
   fn new() -> Self {
     Self {
       paste_called: AtomicUsize::new(0),
+      copy_called: AtomicUsize::new(0),
       last_text: Mutex::new(String::new()),
+      last_copied_text: Mutex::new(String::new()),
       should_fail: AtomicBool::new(false),
     }
   }
@@ -159,6 +163,12 @@ impl Paster for MockPaster {
     if self.should_fail.load(Ordering::SeqCst) {
       return Err("Mock paste failure".to_string());
     }
+    Ok(())
+  }
+
+  fn copy(&self, text: &str) -> Result<(), String> {
+    self.copy_called.fetch_add(1, Ordering::SeqCst);
+    *self.last_copied_text.lock().unwrap() = text.to_string();
     Ok(())
   }
 }

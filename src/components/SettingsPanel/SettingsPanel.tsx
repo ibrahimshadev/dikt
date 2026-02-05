@@ -74,51 +74,55 @@ export default function SettingsPanel(props: SettingsPanelProps) {
           </div>
 
           {/* Animated Tab Content */}
-          <Presence exitBeforeEnter>
-            <Show
-              when={props.activeTab() === 'settings'}
-              fallback={
+          <div class="settings-body">
+            <Presence exitBeforeEnter>
+              <Show
+                when={props.activeTab() === 'settings'}
+                fallback={
+                  <Motion.div
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.15 }}
+                    class="settings-tab-pane"
+                  >
+                    <VocabularyTab
+                      vocabulary={props.settings().vocabulary}
+                      message={props.vocabularyMessage}
+                      isEditorOpen={props.isVocabularyEditorOpen}
+                      editorWord={props.editorWord}
+                      setEditorWord={props.setEditorWord}
+                      editorReplacements={props.editorReplacements}
+                      setEditorReplacements={props.setEditorReplacements}
+                      onOpenCreate={props.onVocabularyOpenCreate}
+                      onEdit={props.onVocabularyEdit}
+                      onSave={props.onVocabularySave}
+                      onCancel={props.onVocabularyCancel}
+                      onToggleEnabled={props.onVocabularyToggleEnabled}
+                      onDelete={props.onVocabularyDelete}
+                    />
+                  </Motion.div>
+                }
+              >
                 <Motion.div
-                  initial={{ opacity: 0, x: 10 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
+                  exit={{ opacity: 0, x: 10 }}
                   transition={{ duration: 0.15 }}
+                  class="settings-tab-pane"
                 >
-                  <VocabularyTab
-                    vocabulary={props.settings().vocabulary}
-                    message={props.vocabularyMessage}
-                    isEditorOpen={props.isVocabularyEditorOpen}
-                    editorWord={props.editorWord}
-                    setEditorWord={props.setEditorWord}
-                    editorReplacements={props.editorReplacements}
-                    setEditorReplacements={props.setEditorReplacements}
-                    onOpenCreate={props.onVocabularyOpenCreate}
-                    onEdit={props.onVocabularyEdit}
-                    onSave={props.onVocabularySave}
-                    onCancel={props.onVocabularyCancel}
-                    onToggleEnabled={props.onVocabularyToggleEnabled}
-                    onDelete={props.onVocabularyDelete}
+                  <SettingsTab
+                    settings={props.settings}
+                    setSettings={props.setSettings}
+                    testMessage={props.testMessage}
+                    saving={props.saving}
+                    onTest={props.onTest}
+                    onSave={props.onSave}
                   />
                 </Motion.div>
-              }
-            >
-              <Motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                transition={{ duration: 0.15 }}
-              >
-                <SettingsTab
-                  settings={props.settings}
-                  setSettings={props.setSettings}
-                  testMessage={props.testMessage}
-                  saving={props.saving}
-                  onTest={props.onTest}
-                  onSave={props.onSave}
-                />
-              </Motion.div>
-            </Show>
-          </Presence>
+              </Show>
+            </Presence>
+          </div>
         </Motion.div>
       </Show>
     </Presence>

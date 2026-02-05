@@ -18,6 +18,14 @@ export default function SettingsTab(props: SettingsTabProps) {
     props.setSettings((current) => ({ ...current, [key]: target.value }));
   };
 
+  const onOutputModeChange = (event: Event) => {
+    const target = event.target as HTMLSelectElement;
+    props.setSettings((current) => ({
+      ...current,
+      copy_to_clipboard_on_success: target.value === 'copy'
+    }));
+  };
+
   const onProviderChange = (event: Event) => {
     const target = event.target as HTMLSelectElement;
     const provider = target.value as Provider;
@@ -79,6 +87,16 @@ export default function SettingsTab(props: SettingsTabProps) {
         <select value={props.settings().hotkey_mode} onChange={onField('hotkey_mode')}>
           <option value="hold">Hold to talk</option>
           <option value="lock">Press to toggle</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Output</span>
+        <select
+          value={props.settings().copy_to_clipboard_on_success ? 'copy' : 'paste'}
+          onChange={onOutputModeChange}
+        >
+          <option value="paste">Paste only (keep clipboard)</option>
+          <option value="copy">Paste + copy to clipboard</option>
         </select>
       </label>
 

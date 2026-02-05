@@ -16,6 +16,7 @@ export type Settings = {
   model: string;
   hotkey: string;
   hotkey_mode: HotkeyMode;
+  copy_to_clipboard_on_success: boolean;
   api_key: string;
   vocabulary: VocabularyEntry[];
 };

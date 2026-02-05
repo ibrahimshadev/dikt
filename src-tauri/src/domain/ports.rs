@@ -12,6 +12,7 @@ pub trait Recorder: Send + Sync {
 
 pub trait Paster: Send + Sync {
   fn paste(&self, text: &str) -> Result<(), String>;
+  fn copy(&self, text: &str) -> Result<(), String>;
 }
 
 #[async_trait::async_trait]

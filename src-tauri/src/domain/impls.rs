@@ -37,7 +37,11 @@ pub struct ClipboardPaster;
 
 impl Paster for ClipboardPaster {
   fn paste(&self, text: &str) -> Result<(), String> {
-    clipboard::copy_and_paste(text)
+    clipboard::copy_and_paste(text, true)
+  }
+
+  fn copy(&self, text: &str) -> Result<(), String> {
+    clipboard::copy_to_clipboard(text)
   }
 }
 
