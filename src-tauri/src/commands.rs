@@ -3,6 +3,7 @@ use tauri::{AppHandle, Emitter, Manager, PhysicalPosition, State, WebviewWindow}
 use crate::domain::types::VocabularyEntry;
 use crate::settings::AppSettings;
 use crate::state::AppState;
+use crate::transcription_history::TranscriptionHistoryItem;
 
 const SETTINGS_WINDOW_GAP: i32 = 8;
 
@@ -65,6 +66,21 @@ pub async fn test_connection(settings: AppSettings) -> Result<String, String> {
     }
 
     Ok("Settings look valid.".to_string())
+}
+
+#[tauri::command]
+pub fn get_transcription_history() -> Result<Vec<TranscriptionHistoryItem>, String> {
+    Ok(crate::transcription_history::load_history())
+}
+
+#[tauri::command]
+pub fn delete_transcription_history_item(id: String) -> Result<(), String> {
+    crate::transcription_history::delete_item(&id)
+}
+
+#[tauri::command]
+pub fn clear_transcription_history() -> Result<(), String> {
+    crate::transcription_history::clear_history()
 }
 
 fn clamp_i32(value: i32, min: i32, max: i32) -> i32 {

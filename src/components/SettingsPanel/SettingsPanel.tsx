@@ -1,9 +1,10 @@
-import { Show } from 'solid-js';
+import { Show, Switch, Match } from 'solid-js';
 import type { Accessor, Setter } from 'solid-js';
 import { Motion, Presence } from 'solid-motionone';
-import type { Tab, Settings, VocabularyEntry } from '../../types';
+import type { Tab, Settings, VocabularyEntry, TranscriptionHistoryItem } from '../../types';
 import SettingsTab from './SettingsTab';
 import VocabularyTab from './VocabularyTab';
+import HistoryTab from './HistoryTab';
 
 type SettingsPanelProps = {
   visible: Accessor<boolean>;
@@ -28,6 +29,11 @@ type SettingsPanelProps = {
   onVocabularyCancel: () => void;
   onVocabularyToggleEnabled: (id: string) => void;
   onVocabularyDelete: (id: string) => void;
+  history: Accessor<TranscriptionHistoryItem[]>;
+  historyMessage: Accessor<string>;
+  onHistoryCopy: (text: string) => void;
+  onHistoryDelete: (id: string) => void;
+  onHistoryClearAll: () => void;
   ref?: (el: HTMLDivElement) => void;
 };
 
@@ -71,14 +77,39 @@ export default function SettingsPanel(props: SettingsPanelProps) {
             >
               Vocabulary
             </button>
+            <button
+              class="tab-button"
+              classList={{ active: props.activeTab() === 'history' }}
+              onClick={() => props.onTabChange('history')}
+              type="button"
+            >
+              History
+            </button>
           </div>
 
           {/* Animated Tab Content */}
           <div class="settings-body">
             <Presence exitBeforeEnter>
-              <Show
-                when={props.activeTab() === 'settings'}
-                fallback={
+              <Switch>
+                <Match when={props.activeTab() === 'settings'}>
+                  <Motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    transition={{ duration: 0.15 }}
+                    class="settings-tab-pane"
+                  >
+                    <SettingsTab
+                      settings={props.settings}
+                      setSettings={props.setSettings}
+                      testMessage={props.testMessage}
+                      saving={props.saving}
+                      onTest={props.onTest}
+                      onSave={props.onSave}
+                    />
+                  </Motion.div>
+                </Match>
+                <Match when={props.activeTab() === 'vocabulary'}>
                   <Motion.div
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -102,25 +133,25 @@ export default function SettingsPanel(props: SettingsPanelProps) {
                       onDelete={props.onVocabularyDelete}
                     />
                   </Motion.div>
-                }
-              >
-                <Motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 10 }}
-                  transition={{ duration: 0.15 }}
-                  class="settings-tab-pane"
-                >
-                  <SettingsTab
-                    settings={props.settings}
-                    setSettings={props.setSettings}
-                    testMessage={props.testMessage}
-                    saving={props.saving}
-                    onTest={props.onTest}
-                    onSave={props.onSave}
-                  />
-                </Motion.div>
-              </Show>
+                </Match>
+                <Match when={props.activeTab() === 'history'}>
+                  <Motion.div
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.15 }}
+                    class="settings-tab-pane"
+                  >
+                    <HistoryTab
+                      history={props.history}
+                      message={props.historyMessage}
+                      onCopy={props.onHistoryCopy}
+                      onDelete={props.onHistoryDelete}
+                      onClearAll={props.onHistoryClearAll}
+                    />
+                  </Motion.div>
+                </Match>
+              </Switch>
             </Presence>
           </div>
         </Motion.div>

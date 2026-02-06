@@ -10,6 +10,7 @@ mod domain;
 mod settings;
 mod state;
 mod transcribe;
+mod transcription_history;
 
 use tauri::{
     menu::{Menu, MenuItem},
@@ -98,6 +99,9 @@ fn main() {
             commands::hide_settings_window,
             commands::sync_settings_window_position,
             commands::set_cursor_passthrough,
+            commands::get_transcription_history,
+            commands::delete_transcription_history_item,
+            commands::clear_transcription_history,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

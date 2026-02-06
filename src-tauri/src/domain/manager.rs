@@ -133,6 +133,10 @@ impl DictationSessionManager {
         .await?;
       let text = apply_vocabulary_replacements(&text, &settings.vocabulary);
 
+      if let Err(e) = crate::transcription_history::append_item(&text, 50) {
+        eprintln!("Failed to save transcription history: {e}");
+      }
+
       {
         let _ = self.set_state(DictationState::Pasting);
       }

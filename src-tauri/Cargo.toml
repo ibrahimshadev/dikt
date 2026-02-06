@@ -23,6 +23,7 @@ keyring = "3"
 once_cell = "1"
 base64 = "0.22"
 regex = "1"
+uuid = { version = "1", features = ["v4"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]

@@ -2,7 +2,7 @@ import { createSignal, onCleanup, onMount } from 'solid-js';
 import { invoke } from '@tauri-apps/api/core';
 import { emit, listen } from '@tauri-apps/api/event';
 
-import type { Settings, Tab, VocabularyEntry } from './types';
+import type { Settings, Tab, VocabularyEntry, TranscriptionHistoryItem } from './types';
 import {
   DEFAULT_SETTINGS,
   MAX_REPLACEMENTS_PER_ENTRY,
@@ -47,6 +47,9 @@ export default function SettingsApp() {
   const [testMessage, setTestMessage] = createSignal('');
   const [vocabularyMessage, setVocabularyMessage] = createSignal('');
   const [saving, setSaving] = createSignal(false);
+
+  const [history, setHistory] = createSignal<TranscriptionHistoryItem[]>([]);
+  const [historyMessage, setHistoryMessage] = createSignal('');
 
   const [isVocabularyEditorOpen, setIsVocabularyEditorOpen] = createSignal(false);
   const [editingVocabularyId, setEditingVocabularyId] = createSignal<string | null>(null);
@@ -119,10 +122,49 @@ export default function SettingsApp() {
     }
   };
 
+  const loadHistory = async () => {
+    try {
+      const items = await invoke<TranscriptionHistoryItem[]>('get_transcription_history');
+      setHistory(items);
+    } catch (err) {
+      setHistoryMessage(String(err));
+    }
+  };
+
+  const deleteHistoryItem = async (id: string) => {
+    try {
+      await invoke('delete_transcription_history_item', { id });
+      setHistory((prev) => prev.filter((item) => item.id !== id));
+      setHistoryMessage('Entry deleted.');
+    } catch (err) {
+      setHistoryMessage(String(err));
+    }
+  };
+
+  const clearHistory = async () => {
+    try {
+      await invoke('clear_transcription_history');
+      setHistory([]);
+      setHistoryMessage('History cleared.');
+    } catch (err) {
+      setHistoryMessage(String(err));
+    }
+  };
+
+  const copyHistoryText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setHistoryMessage('Copied to clipboard.');
+    } catch (err) {
+      setHistoryMessage('Failed to copy: ' + String(err));
+    }
+  };
+
   const switchToTab = (tab: Tab) => {
     setActiveTab(tab);
     setTestMessage('');
     setVocabularyMessage('');
+    setHistoryMessage('');
   };
 
   const openCreateVocabularyEditor = () => {
@@ -211,11 +253,14 @@ export default function SettingsApp() {
   onMount(async () => {
     document.body.classList.add('window-settings');
     await loadSettings();
+    await loadHistory();
 
     const unlistenOpened = await listen('settings-window-opened', () => {
       setTestMessage('');
       setVocabularyMessage('');
+      setHistoryMessage('');
       void loadSettings();
+      void loadHistory();
     });
 
     onCleanup(() => {
@@ -249,6 +294,11 @@ export default function SettingsApp() {
         onVocabularyCancel={cancelVocabularyEditor}
         onVocabularyToggleEnabled={toggleVocabularyEntryEnabled}
         onVocabularyDelete={deleteVocabularyEntry}
+        history={history}
+        historyMessage={historyMessage}
+        onHistoryCopy={copyHistoryText}
+        onHistoryDelete={deleteHistoryItem}
+        onHistoryClearAll={clearHistory}
       />
     </div>
   );

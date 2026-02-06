@@ -735,7 +735,7 @@ dependencies = [
 
 [[package]]
 name = "dikt"
-version = "1.10.0"
+version = "1.11.0"
 dependencies = [
  "arboard",
  "async-trait",
@@ -753,6 +753,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-global-shortcut",
  "tokio",
+ "uuid",
  "windows 0.56.0",
 ]
 

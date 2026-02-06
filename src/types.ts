@@ -1,5 +1,5 @@
 export type Status = 'idle' | 'recording' | 'transcribing' | 'pasting' | 'done' | 'error';
-export type Tab = 'settings' | 'vocabulary';
+export type Tab = 'settings' | 'vocabulary' | 'history';
 export type Provider = 'groq' | 'openai' | 'custom';
 export type HotkeyMode = 'hold' | 'lock';
 
@@ -19,6 +19,12 @@ export type Settings = {
   copy_to_clipboard_on_success: boolean;
   api_key: string;
   vocabulary: VocabularyEntry[];
+};
+
+export type TranscriptionHistoryItem = {
+  id: string;
+  text: string;
+  created_at_ms: number;
 };
 
 export type DictationUpdate = {
