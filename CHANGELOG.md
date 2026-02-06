@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/ibrahimshadev/dikt/compare/v1.13.0...v1.13.1) (2026-02-06)
+
+
+### Bug Fixes
+
+* **window:** ensure WS_EX_LAYERED persists and tighten hot zone ([1611b51](https://github.com/ibrahimshadev/dikt/commit/1611b5175208616f7fe930e7d557ef3075718c6b))
+
 # [1.13.0](https://github.com/ibrahimshadev/dikt/compare/v1.12.0...v1.13.0) (2026-02-06)
 
 
