@@ -135,6 +135,9 @@ impl DictationSessionManager {
 
       if let Err(e) = crate::transcription_history::append_item(&text, 50) {
         eprintln!("Failed to save transcription history: {e}");
+        crate::transcription_history::record_runtime_error(format!(
+          "Failed to save transcription history: {e}"
+        ));
       }
 
       {

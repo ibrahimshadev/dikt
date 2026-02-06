@@ -11,6 +11,45 @@ const SETTINGS_WINDOW_GAP: i32 = 8;
 static CURSOR_PASSTHROUGH: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(true);
 
+/// Toggle only WS_EX_TRANSPARENT on an HWND.
+/// Unlike tao's set_ignore_cursor_events, this never touches WS_EX_LAYERED,
+/// preventing the WebView2 rendering surface corruption that occurs when
+/// WS_EX_LAYERED is repeatedly added/removed without SetLayeredWindowAttributes.
+#[cfg(target_os = "windows")]
+unsafe fn toggle_ex_transparent(hwnd: windows::Win32::Foundation::HWND, enable: bool) {
+    use windows::Win32::UI::WindowsAndMessaging::*;
+    let ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+    let new_style = if enable {
+        ex_style | WS_EX_TRANSPARENT.0 as isize
+    } else {
+        ex_style & !(WS_EX_TRANSPARENT.0 as isize)
+    };
+    if new_style != ex_style {
+        SetWindowLongPtrW(hwnd, GWL_EXSTYLE, new_style);
+    }
+}
+
+/// Extract the raw HWND value from a WebviewWindow.
+#[cfg(target_os = "windows")]
+fn get_hwnd_value(window: &WebviewWindow) -> Option<isize> {
+    window.hwnd().ok().map(|h| h.0 as isize)
+}
+
+/// Initialize click-through for the main window using WS_EX_TRANSPARENT only.
+#[allow(unused_variables)]
+pub fn init_click_through(window: &WebviewWindow) {
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(hwnd_val) = get_hwnd_value(window) {
+            let hwnd = windows::Win32::Foundation::HWND(hwnd_val);
+            unsafe {
+                toggle_ex_transparent(hwnd, true);
+            }
+            CURSOR_PASSTHROUGH.store(true, std::sync::atomic::Ordering::Relaxed);
+        }
+    }
+}
+
 #[tauri::command]
 pub fn start_recording(window: WebviewWindow, state: State<'_, AppState>) -> Result<(), String> {
     let window = window.clone();
@@ -25,12 +64,20 @@ pub async fn stop_and_transcribe(
     state: State<'_, AppState>,
 ) -> Result<String, String> {
     let window = window.clone();
-    state
+    let app = window.app_handle();
+    let update_window = window.clone();
+    let result = state
         .manager
         .stop_and_process(move |update| {
-            let _ = window.emit("dictation:update", update);
+            let _ = update_window.emit("dictation:update", update);
         })
-        .await
+        .await;
+
+    if let Some(message) = crate::transcription_history::take_runtime_error() {
+        let _ = app.emit("transcription-history-error", message);
+    }
+
+    result
 }
 
 #[tauri::command]
@@ -70,7 +117,7 @@ pub async fn test_connection(settings: AppSettings) -> Result<String, String> {
 
 #[tauri::command]
 pub fn get_transcription_history() -> Result<Vec<TranscriptionHistoryItem>, String> {
-    Ok(crate::transcription_history::load_history())
+    crate::transcription_history::load_history()
 }
 
 #[tauri::command]
@@ -121,10 +168,16 @@ pub fn set_cursor_passthrough(window: WebviewWindow, ignore: bool) -> Result<(),
     #[cfg(target_os = "windows")]
     {
         use std::sync::atomic::Ordering;
-        window
-            .set_ignore_cursor_events(ignore)
-            .map_err(|e| e.to_string())?;
-        CURSOR_PASSTHROUGH.store(ignore, Ordering::Relaxed);
+        let current = CURSOR_PASSTHROUGH.load(Ordering::Relaxed);
+        if current != ignore {
+            if let Some(hwnd_val) = get_hwnd_value(&window) {
+                let hwnd = windows::Win32::Foundation::HWND(hwnd_val);
+                unsafe {
+                    toggle_ex_transparent(hwnd, ignore);
+                }
+                CURSOR_PASSTHROUGH.store(ignore, Ordering::Relaxed);
+            }
+        }
     }
     let _ = (&window, ignore);
     Ok(())
@@ -136,54 +189,66 @@ pub fn set_cursor_passthrough(window: WebviewWindow, ignore: bool) -> Result<(),
 pub fn start_cursor_tracker(app: &AppHandle) {
     #[cfg(target_os = "windows")]
     {
-        let app = app.clone();
-        std::thread::spawn(move || loop {
-            std::thread::sleep(std::time::Duration::from_millis(50));
+        use windows::Win32::Foundation::{HWND, RECT};
+        use windows::Win32::UI::WindowsAndMessaging::*;
 
-            if !CURSOR_PASSTHROUGH.load(std::sync::atomic::Ordering::Relaxed) {
-                continue;
-            }
+        let hwnd_val = match app
+            .get_webview_window("main")
+            .and_then(|w| get_hwnd_value(&w))
+        {
+            Some(v) => v,
+            None => return,
+        };
 
-            let window = match app.get_webview_window("main") {
-                Some(w) => w,
-                None => break,
-            };
+        std::thread::spawn(move || {
+            let hwnd = HWND(hwnd_val);
 
-            if !window.is_visible().unwrap_or(false) {
-                continue;
-            }
+            loop {
+                std::thread::sleep(std::time::Duration::from_millis(50));
 
-            let win_pos = match window.outer_position() {
-                Ok(p) => p,
-                Err(_) => continue,
-            };
+                if !unsafe { IsWindow(hwnd).as_bool() } {
+                    break;
+                }
 
-            let win_size = match window.outer_size() {
-                Ok(s) => s,
-                Err(_) => continue,
-            };
+                if !CURSOR_PASSTHROUGH.load(std::sync::atomic::Ordering::Relaxed) {
+                    continue;
+                }
 
-            let cursor = match cursor_position() {
-                Some(p) => p,
-                None => continue,
-            };
+                if !unsafe { IsWindowVisible(hwnd).as_bool() } {
+                    continue;
+                }
 
-            // Hot zone: center 40% width, bottom 50% height of the window.
-            // Covers the pill in any state with generous margins.
-            let zone_w = win_size.width as i32 * 2 / 5;
-            let zone_h = win_size.height as i32 / 2;
-            let zone_left = win_pos.x + (win_size.width as i32 - zone_w) / 2;
-            let zone_right = zone_left + zone_w;
-            let zone_top = win_pos.y + win_size.height as i32 - zone_h;
-            let zone_bottom = win_pos.y + win_size.height as i32;
+                let mut rect = RECT::default();
+                if unsafe { GetWindowRect(hwnd, &mut rect) }.is_err() {
+                    continue;
+                }
 
-            if cursor.0 >= zone_left
-                && cursor.0 <= zone_right
-                && cursor.1 >= zone_top
-                && cursor.1 <= zone_bottom
-            {
-                let _ = window.set_ignore_cursor_events(false);
-                CURSOR_PASSTHROUGH.store(false, std::sync::atomic::Ordering::Relaxed);
+                let cursor = match cursor_position() {
+                    Some(p) => p,
+                    None => continue,
+                };
+
+                // Hot zone: center 40% width, bottom 50% height of the window.
+                // Covers the pill in any state with generous margins.
+                let win_w = rect.right - rect.left;
+                let win_h = rect.bottom - rect.top;
+                let zone_w = win_w * 2 / 5;
+                let zone_h = win_h / 2;
+                let zone_left = rect.left + (win_w - zone_w) / 2;
+                let zone_right = zone_left + zone_w;
+                let zone_top = rect.bottom - zone_h;
+                let zone_bottom = rect.bottom;
+
+                if cursor.0 >= zone_left
+                    && cursor.0 <= zone_right
+                    && cursor.1 >= zone_top
+                    && cursor.1 <= zone_bottom
+                {
+                    unsafe {
+                        toggle_ex_transparent(hwnd, false);
+                    }
+                    CURSOR_PASSTHROUGH.store(false, std::sync::atomic::Ordering::Relaxed);
+                }
             }
         });
     }

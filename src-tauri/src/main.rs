@@ -79,8 +79,7 @@ fn main() {
             // Position window at bottom center, enable click-through
             if let Some(window) = app.get_webview_window("main") {
                 let _ = commands::position_window_bottom_internal(&window);
-                #[cfg(target_os = "windows")]
-                let _ = window.set_ignore_cursor_events(true);
+                commands::init_click_through(&window);
             }
             commands::start_cursor_tracker(app.handle());
             let _ = commands::hide_settings_window_internal(app.handle());

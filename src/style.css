@@ -37,10 +37,15 @@ body.window-settings {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 
-/* Tooltip (animated by solid-motionone) */
+/* Tooltip — always in DOM, absolutely positioned so it doesn't affect pill-area size.
+   Uses only compositor-safe transitions (opacity, transform). */
 .tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -53,10 +58,24 @@ body.window-settings {
   color: #d4d4d4;
   white-space: nowrap;
   pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 16px;
 }
 
 .tooltip.visible {
   pointer-events: auto;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .tooltip strong {

@@ -1,8 +1,13 @@
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
+use std::sync::Mutex;
+
+const MAX_HISTORY_ITEMS: usize = 50;
+static LAST_HISTORY_ERROR: Lazy<Mutex<Option<String>>> = Lazy::new(|| Mutex::new(None));
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TranscriptionHistoryItem {
@@ -25,32 +30,70 @@ fn history_path() -> Result<PathBuf, String> {
     Ok(base_dir.join("dikt").join("transcription_history.json"))
 }
 
-fn load_history_from(path: &PathBuf) -> Vec<TranscriptionHistoryItem> {
-    let contents = match fs::read_to_string(path) {
-        Ok(c) => c,
-        Err(_) => return Vec::new(),
-    };
-    serde_json::from_str(&contents).unwrap_or_default()
+fn set_last_error(message: String) {
+    if let Ok(mut guard) = LAST_HISTORY_ERROR.lock() {
+        *guard = Some(message);
+    }
 }
 
-fn save_history_to(path: &PathBuf, items: &[TranscriptionHistoryItem]) -> Result<(), String> {
+fn normalize_items(mut items: Vec<TranscriptionHistoryItem>) -> Vec<TranscriptionHistoryItem> {
+    items.sort_by(|a, b| b.created_at_ms.cmp(&a.created_at_ms));
+    items.truncate(MAX_HISTORY_ITEMS);
+    items
+}
+
+fn load_history_from(path: &Path) -> Result<Vec<TranscriptionHistoryItem>, String> {
+    let contents = match fs::read_to_string(path) {
+        Ok(c) => c,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+        Err(e) => {
+            return Err(format!(
+                "Failed to read transcription history file '{}': {e}",
+                path.display()
+            ))
+        }
+    };
+    let items: Vec<TranscriptionHistoryItem> = serde_json::from_str(&contents).map_err(|e| {
+        format!(
+            "Failed to parse transcription history JSON from '{}': {e}",
+            path.display()
+        )
+    })?;
+    Ok(normalize_items(items))
+}
+
+fn save_history_to(path: &Path, items: &[TranscriptionHistoryItem]) -> Result<(), String> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
     let contents = serde_json::to_string_pretty(items).map_err(|e| e.to_string())?;
-    fs::write(path, contents).map_err(|e| e.to_string())
+    let tmp_path = path.with_extension("json.tmp");
+    fs::write(&tmp_path, contents).map_err(|e| {
+        format!(
+            "Failed to write temporary transcription history file '{}': {e}",
+            tmp_path.display()
+        )
+    })?;
+    if let Err(e) = fs::rename(&tmp_path, path) {
+        let _ = fs::remove_file(path);
+        fs::rename(&tmp_path, path).map_err(|rename_err| {
+            format!(
+                "Failed to move transcription history file '{}' into place (rename error: {e}, retry error: {rename_err})",
+                path.display()
+            )
+        })?;
+    }
+    Ok(())
 }
 
-pub fn load_history() -> Vec<TranscriptionHistoryItem> {
-    match history_path() {
-        Ok(p) => load_history_from(&p),
-        Err(_) => Vec::new(),
-    }
+pub fn load_history() -> Result<Vec<TranscriptionHistoryItem>, String> {
+    let path = history_path()?;
+    load_history_from(&path)
 }
 
 pub fn append_item(text: &str, max_items: usize) -> Result<(), String> {
     let path = history_path()?;
-    let mut items = load_history_from(&path);
+    let mut items = load_history_from(&path)?;
 
     let now_ms = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -71,7 +114,7 @@ pub fn append_item(text: &str, max_items: usize) -> Result<(), String> {
 
 pub fn delete_item(id: &str) -> Result<(), String> {
     let path = history_path()?;
-    let mut items = load_history_from(&path);
+    let mut items = load_history_from(&path)?;
     items.retain(|item| item.id != id);
     save_history_to(&path, &items)
 }
@@ -79,6 +122,17 @@ pub fn delete_item(id: &str) -> Result<(), String> {
 pub fn clear_history() -> Result<(), String> {
     let path = history_path()?;
     save_history_to(&path, &[])
+}
+
+pub fn record_runtime_error(message: String) {
+    set_last_error(message);
+}
+
+pub fn take_runtime_error() -> Option<String> {
+    LAST_HISTORY_ERROR
+        .lock()
+        .ok()
+        .and_then(|mut guard| guard.take())
 }
 
 #[cfg(test)]
@@ -93,7 +147,7 @@ mod tests {
     #[test]
     fn load_empty_returns_empty_vec() {
         let path = test_path();
-        let items = load_history_from(&path);
+        let items = load_history_from(&path).unwrap();
         assert!(items.is_empty());
     }
 
@@ -106,7 +160,7 @@ mod tests {
             created_at_ms: 1000,
         }];
         save_history_to(&path, &items).unwrap();
-        let loaded = load_history_from(&path);
+        let loaded = load_history_from(&path).unwrap();
         assert_eq!(loaded.len(), 1);
         assert_eq!(loaded[0].id, "test-1");
         assert_eq!(loaded[0].text, "Hello world");
@@ -117,7 +171,7 @@ mod tests {
     fn append_prepends_and_trims() {
         let path = test_path();
         for i in 0..5 {
-            let mut items = load_history_from(&path);
+            let mut items = load_history_from(&path).unwrap();
             let item = TranscriptionHistoryItem {
                 id: uuid::Uuid::new_v4().to_string(),
                 text: format!("item {i}"),
@@ -127,7 +181,7 @@ mod tests {
             items.truncate(3);
             save_history_to(&path, &items).unwrap();
         }
-        let items = load_history_from(&path);
+        let items = load_history_from(&path).unwrap();
         assert_eq!(items.len(), 3);
         assert_eq!(items[0].text, "item 4");
         assert_eq!(items[1].text, "item 3");
@@ -152,11 +206,11 @@ mod tests {
         ];
         save_history_to(&path, &items).unwrap();
 
-        let mut loaded = load_history_from(&path);
+        let mut loaded = load_history_from(&path).unwrap();
         loaded.retain(|item| item.id != "a");
         save_history_to(&path, &loaded).unwrap();
 
-        let result = load_history_from(&path);
+        let result = load_history_from(&path).unwrap();
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].text, "one");
         let _ = fs::remove_dir_all(path.parent().unwrap().parent().unwrap());
@@ -172,7 +226,7 @@ mod tests {
         }];
         save_history_to(&path, &items).unwrap();
         save_history_to(&path, &[]).unwrap();
-        let result = load_history_from(&path);
+        let result = load_history_from(&path).unwrap();
         assert!(result.is_empty());
         let _ = fs::remove_dir_all(path.parent().unwrap().parent().unwrap());
     }
@@ -182,8 +236,27 @@ mod tests {
         let path = test_path();
         fs::create_dir_all(path.parent().unwrap()).unwrap();
         fs::write(&path, "not valid json!!!").unwrap();
-        let items = load_history_from(&path);
-        assert!(items.is_empty());
+        let result = load_history_from(&path);
+        assert!(result.is_err());
+        let _ = fs::remove_dir_all(path.parent().unwrap().parent().unwrap());
+    }
+
+    #[test]
+    fn load_truncates_to_max_items() {
+        let path = test_path();
+        let mut items = Vec::new();
+        for i in 0..75 {
+            items.push(TranscriptionHistoryItem {
+                id: format!("item-{i}"),
+                text: format!("entry {i}"),
+                created_at_ms: i as i64,
+            });
+        }
+        save_history_to(&path, &items).unwrap();
+        let loaded = load_history_from(&path).unwrap();
+        assert_eq!(loaded.len(), 50);
+        assert_eq!(loaded[0].id, "item-74");
+        assert_eq!(loaded[49].id, "item-25");
         let _ = fs::remove_dir_all(path.parent().unwrap().parent().unwrap());
     }
 }

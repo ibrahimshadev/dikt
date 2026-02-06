@@ -263,9 +263,15 @@ export default function SettingsApp() {
       void loadHistory();
     });
 
+    const unlistenHistoryError = await listen<string>('transcription-history-error', (event) => {
+      setHistoryMessage(event.payload);
+      void loadHistory();
+    });
+
     onCleanup(() => {
       document.body.classList.remove('window-settings');
       void unlistenOpened();
+      void unlistenHistoryError();
     });
   });
 
