@@ -35,7 +35,10 @@ fn get_hwnd_value(window: &WebviewWindow) -> Option<isize> {
     window.hwnd().ok().map(|h| h.0 as isize)
 }
 
-/// Initialize click-through for the main window using WS_EX_TRANSPARENT only.
+/// Initialize click-through for the main window.
+/// Ensures WS_EX_LAYERED is set once (with SetLayeredWindowAttributes to keep
+/// the window visible), then adds WS_EX_TRANSPARENT for click-through.
+/// WS_EX_LAYERED is never removed — only WS_EX_TRANSPARENT is toggled later.
 #[allow(unused_variables)]
 pub fn init_click_through(window: &WebviewWindow) {
     #[cfg(target_os = "windows")]
@@ -43,6 +46,22 @@ pub fn init_click_through(window: &WebviewWindow) {
         if let Some(hwnd_val) = get_hwnd_value(window) {
             let hwnd = windows::Win32::Foundation::HWND(hwnd_val);
             unsafe {
+                use windows::Win32::Foundation::COLORREF;
+                use windows::Win32::UI::WindowsAndMessaging::*;
+
+                // Ensure WS_EX_LAYERED is set (required for WS_EX_TRANSPARENT
+                // click-through to work with WebView2 child windows).
+                let ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+                if ex_style & WS_EX_LAYERED.0 as isize == 0 {
+                    SetWindowLongPtrW(
+                        hwnd,
+                        GWL_EXSTYLE,
+                        ex_style | WS_EX_LAYERED.0 as isize,
+                    );
+                }
+                // Pin the layered window at full opacity so it stays visible.
+                let _ = SetLayeredWindowAttributes(hwnd, COLORREF(0), 255, LWA_ALPHA);
+
                 toggle_ex_transparent(hwnd, true);
             }
             CURSOR_PASSTHROUGH.store(true, std::sync::atomic::Ordering::Relaxed);
@@ -228,12 +247,11 @@ pub fn start_cursor_tracker(app: &AppHandle) {
                     None => continue,
                 };
 
-                // Hot zone: center 40% width, bottom 50% height of the window.
-                // Covers the pill in any state with generous margins.
+                // Hot zone: tight around the pill (max 90×28 expanded).
+                // Small margin so hover is detected just before reaching the pill.
                 let win_w = rect.right - rect.left;
-                let win_h = rect.bottom - rect.top;
-                let zone_w = win_w * 2 / 5;
-                let zone_h = win_h / 2;
+                let zone_w = 110;
+                let zone_h = 40;
                 let zone_left = rect.left + (win_w - zone_w) / 2;
                 let zone_right = zone_left + zone_w;
                 let zone_top = rect.bottom - zone_h;
