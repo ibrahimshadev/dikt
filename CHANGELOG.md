@@ -1,3 +1,15 @@
+# [1.13.0](https://github.com/ibrahimshadev/dikt/compare/v1.12.0...v1.13.0) (2026-02-06)
+
+
+### Bug Fixes
+
+* **window:** prevent pill from becoming invisible over time ([43a1337](https://github.com/ibrahimshadev/dikt/commit/43a13370f82f2b45c414098313086b69d794fc8f))
+
+
+### Features
+
+* **history:** add transcription history with settings tab ([7b817c1](https://github.com/ibrahimshadev/dikt/commit/7b817c166b39f888ab22c645fe2b9a0a4e47371d))
+
 # [1.12.0](https://github.com/ibrahimshadev/dikt/compare/v1.11.0...v1.12.0) (2026-02-05)
 
 
