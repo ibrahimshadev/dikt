@@ -40,45 +40,41 @@ function SettingsPanel(props: RightPanelProps) {
   return (
     <div class="p-6 flex-1 flex flex-col h-full">
       {/* AI Configuration Heading */}
-      <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-6">
+      <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-0.5">
         AI Configuration
       </h2>
+      <p class="text-xs text-gray-500 leading-relaxed mb-5">
+        Click a mode to activate it. Click the active mode again to deactivate it.
+      </p>
 
       {/* Transcription Modes */}
       <div class="space-y-3 mb-8">
         <For each={panelModes()}>
           {(mode) => {
-            const isActive = props.activeModeId() === mode.id;
+            const isActive = () => props.activeModeId() === mode.id;
             const modeColor = MODE_COLORS[mode.id] ?? { bg: 'bg-primary/10', text: 'text-primary' };
             const icon = MODE_ICONS[mode.id] ?? 'tune';
             return (
               <button
                 type="button"
-                onClick={() => props.onSetActiveModeId(isActive ? null : mode.id)}
+                onClick={() => props.onSetActiveModeId(isActive() ? null : mode.id)}
                 class={`relative p-4 rounded-xl border cursor-pointer group transition-colors ${
-                  isActive
+                  isActive()
                     ? 'border-primary bg-primary/5 shadow-[0_0_20px_rgba(16,183,127,0.05)]'
                     : 'border-white/5 bg-surface-dark hover:border-white/10'
                 }`}
               >
                 <div class="flex justify-between items-start mb-1">
-                  <span class={`font-semibold transition-colors text-left ${isActive ? 'text-white group-hover:text-primary' : 'text-gray-300 group-hover:text-white'}`}>
+                  <span class={`font-semibold transition-colors text-left ${isActive() ? 'text-white group-hover:text-primary' : 'text-gray-300 group-hover:text-white'}`}>
                     {mode.name}
                   </span>
                   <span class={`material-symbols-outlined text-[18px] ${modeColor.bg} ${modeColor.text} rounded-md px-1.5 py-0.5`}>
                     {icon}
                   </span>
                 </div>
-                <p class={`text-xs leading-relaxed text-left ${isActive ? 'text-gray-400' : 'text-gray-500'}`}>
+                <p class={`text-xs leading-relaxed text-left ${isActive() ? 'text-gray-400' : 'text-gray-500'}`}>
                   {promptPreview(mode.system_prompt)}
                 </p>
-                <span class={`mt-3 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wide border ${
-                  isActive
-                    ? 'bg-primary/20 text-primary border-primary/20'
-                    : 'bg-transparent text-zinc-500 border-white/10'
-                }`}>
-                  {isActive ? 'ACTIVE' : 'INACTIVE'}
-                </span>
               </button>
             );
           }}
