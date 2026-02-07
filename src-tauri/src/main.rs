@@ -46,7 +46,7 @@ fn main() {
                     }
                     "reset_position" => {
                         if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.show();
+                            commands::ensure_main_visible(&window);
                             let _ = commands::position_window_bottom_internal(&window);
                         }
                     }

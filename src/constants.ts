@@ -1,8 +1,9 @@
 import type { Provider, Settings } from './types';
+import { DEFAULT_MODES } from './defaultModes';
 
 export const CHAT_MODELS: Record<Provider, string[]> = {
   groq: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it'],
-  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo'],
+  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1-nano'],
   custom: []
 };
 
@@ -15,7 +16,7 @@ export const PROVIDERS: Record<Provider, { label: string; base_url: string; mode
   openai: {
     label: 'OpenAI',
     base_url: 'https://api.openai.com/v1',
-    models: ['gpt-4o-transcribe', 'gpt-4o-mini-transcribe', 'whisper-1']
+    models: ['whisper-1', 'gpt-4o-transcribe', 'gpt-4o-mini-transcribe']
   },
   custom: {
     label: 'Custom',
@@ -32,9 +33,10 @@ export const DEFAULT_SETTINGS: Settings = {
   hotkey_mode: 'hold',
   copy_to_clipboard_on_success: false,
   api_key: '',
+  provider_api_keys: {},
   vocabulary: [],
   active_mode_id: null,
-  modes: []
+  modes: DEFAULT_MODES
 };
 
 export const MAX_VOCABULARY_ENTRIES = 100;

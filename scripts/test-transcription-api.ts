@@ -9,7 +9,7 @@
 import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 
-const PROVIDERS: Record<string, { url: string; model: string }> = {
+const PROVIDERS: Record<string, { url: string; model: string; format?: string }> = {
   groq: {
     url: 'https://api.groq.com/openai/v1/audio/transcriptions',
     model: 'whisper-large-v3',
@@ -17,6 +17,11 @@ const PROVIDERS: Record<string, { url: string; model: string }> = {
   openai: {
     url: 'https://api.openai.com/v1/audio/transcriptions',
     model: 'whisper-1',
+  },
+  'openai-gpt4o': {
+    url: 'https://api.openai.com/v1/audio/transcriptions',
+    model: 'gpt-4o-transcribe',
+    format: 'json',
   },
 };
 
@@ -56,7 +61,7 @@ async function main() {
   const formData = new FormData();
   formData.append('file', new Blob([fileData]), fileName);
   formData.append('model', provider.model);
-  formData.append('response_format', 'verbose_json');
+  formData.append('response_format', provider.format ?? 'verbose_json');
 
   console.log(`\n--- ${providerName.toUpperCase()} (${provider.model}) ---`);
   console.log(`POST ${provider.url}`);

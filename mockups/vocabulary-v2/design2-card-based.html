@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>dikt Vocabulary Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f43f5e", // Coral Rose
+                        "primary-dark": "#e11d48",
+                        "slate-sidebar": "#1e293b",
+                        "background-light": "#f8fafc", // Cool Gray
+                        "background-dark": "#0f172a",
+                        "border-subtle": "#e2e8f0",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 h-screen overflow-hidden flex selection:bg-primary/20 selection:text-primary">
+<!-- Left Sidebar -->
+<aside class="w-64 bg-slate-sidebar text-slate-400 flex flex-col shrink-0 h-full border-r border-slate-700/50">
+<!-- Brand -->
+<div class="h-16 flex items-center px-6 border-b border-slate-700/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[28px]">mic</span>
+<h1 class="text-slate-100 text-xl font-bold tracking-tight">dikt</h1>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700/50 hover:text-slate-200 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-slate-200">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700/50 hover:text-slate-200 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-slate-200">history</span>
+                History
+            </a>
+<!-- Active Item -->
+<a class="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium bg-slate-800 text-white shadow-sm ring-1 ring-white/10 relative overflow-hidden group" href="#">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-center gap-3 pl-2">
+<span class="material-symbols-outlined text-[20px] text-primary">book_2</span>
+                    Vocabulary
+                </div>
+<span class="bg-primary text-white text-xs font-bold px-1.5 py-0.5 rounded-md min-w-[20px] text-center">5</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700/50 hover:text-slate-200 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-slate-200">tune</span>
+                Modes
+            </a>
+</nav>
+<!-- User Profile (Optional placeholder) -->
+<div class="p-4 border-t border-slate-700/50">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-slate-600 flex items-center justify-center text-xs font-bold text-white">JD</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-200">Jane Doe</span>
+<span class="text-xs text-slate-500">Pro Plan</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Center Panel (Workspace) -->
+<main class="flex-1 flex flex-col min-w-0 bg-background-light dark:bg-background-dark relative">
+<!-- Header -->
+<header class="h-16 px-8 flex items-center justify-between border-b border-border-subtle bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+<div class="flex-1 max-w-lg relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-[20px]">search</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-lg bg-white border border-slate-200 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm" placeholder="Search vocabulary..." type="text"/>
+</div>
+<div class="flex items-center gap-2 ml-4">
+<button class="h-9 px-3 flex items-center gap-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                    Filter
+                </button>
+<button class="h-9 w-9 flex items-center justify-center text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[18px]">sort</span>
+</button>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto p-8">
+<div class="max-w-4xl mx-auto space-y-4 pb-20">
+<!-- Expanded Card (Editing State) -->
+<div class="bg-white rounded-xl shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)] border border-slate-200 overflow-hidden ring-1 ring-primary/10">
+<div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">edit</span>
+<h3 class="font-semibold text-slate-900">Edit Vocabulary</h3>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Active</span>
+<button class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<span class="sr-only">Use setting</span>
+<span aria-hidden="true" class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+<div class="p-6 space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-700">Word or Phrase</label>
+<input class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm h-11 px-3" type="text" value="Kubernetes"/>
+<p class="text-xs text-slate-500">The corrected output text.</p>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-700">Category (Optional)</label>
+<select class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm h-11 px-3 bg-white">
+<option>Technology</option>
+<option>Medical</option>
+<option>Legal</option>
+</select>
+</div>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-700">Phonetic Replacements</label>
+<textarea class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-3 font-mono text-sm" placeholder="Enter variations separated by commas..." rows="3">koober nettes, cube annettes, cooper net is</textarea>
+<p class="text-xs text-slate-500">Variations of speech that should map to this word.</p>
+</div>
+</div>
+<div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+<button class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">Cancel</button>
+<button class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">Save Changes</button>
+</div>
+</div>
+<!-- Regular Card: TypeScript -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 hover:border-primary/30 transition-all duration-200 group flex items-center justify-between p-4 px-6">
+<div class="flex flex-col">
+<span class="text-base font-semibold text-slate-900 group-hover:text-primary transition-colors">TypeScript</span>
+<span class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">graphic_eq</span>
+                            2 patterns defined
+                        </span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-primary focus:outline-none">
+<span class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+<!-- Regular Card: PostgreSQL -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 hover:border-primary/30 transition-all duration-200 group flex items-center justify-between p-4 px-6">
+<div class="flex flex-col">
+<span class="text-base font-semibold text-slate-900 group-hover:text-primary transition-colors">PostgreSQL</span>
+<span class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">graphic_eq</span>
+                            4 patterns defined
+                        </span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-primary focus:outline-none">
+<span class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+<!-- Regular Card: Supabase (Disabled) -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 hover:border-primary/30 transition-all duration-200 group flex items-center justify-between p-4 px-6 opacity-75">
+<div class="flex flex-col">
+<span class="text-base font-semibold text-slate-500 group-hover:text-primary transition-colors">Supabase</span>
+<span class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">graphic_eq</span>
+                            1 pattern defined
+                        </span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-slate-200 focus:outline-none">
+<span class="translate-x-0 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+<!-- Regular Card: OAuth -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 hover:border-primary/30 transition-all duration-200 group flex items-center justify-between p-4 px-6">
+<div class="flex flex-col">
+<span class="text-base font-semibold text-slate-900 group-hover:text-primary transition-colors">OAuth</span>
+<span class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">graphic_eq</span>
+                            3 patterns defined
+                        </span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-primary focus:outline-none">
+<span class="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Action Button -->
+<button class="absolute bottom-8 right-8 h-14 w-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center z-20">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+</main>
+<!-- Right Panel (Insights & Help) -->
+<aside class="w-80 bg-white border-l border-border-subtle hidden xl:flex flex-col overflow-y-auto">
+<div class="p-6 border-b border-slate-100">
+<h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Insights &amp; Help</h2>
+<p class="text-xs text-slate-500">Understanding your dictionary.</p>
+</div>
+<!-- Visual Flow Widget -->
+<div class="p-6 border-b border-slate-100">
+<h3 class="text-sm font-semibold text-slate-800 mb-4">How it works</h3>
+<div class="flex flex-col items-center gap-4">
+<div class="flex flex-col items-center gap-2 p-3 bg-slate-50 rounded-lg w-full border border-slate-100">
+<div class="flex items-center gap-2 text-slate-500">
+<span class="material-symbols-outlined text-[20px]">mic</span>
+<span class="text-xs font-mono">You say</span>
+</div>
+<div class="text-sm font-medium text-slate-700 italic">"cube annettes"</div>
+</div>
+<div class="flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[24px]">arrow_downward</span>
+</div>
+<div class="flex flex-col items-center gap-2 p-3 bg-primary/5 rounded-lg w-full border border-primary/20">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+<span class="text-xs font-bold">dikt matches</span>
+</div>
+<div class="text-base font-bold text-slate-900">Kubernetes</div>
+</div>
+</div>
+<p class="text-xs text-slate-400 mt-4 text-center leading-relaxed">
+                The engine matches phonetic approximations to your defined vocabulary list instantly.
+            </p>
+</div>
+<!-- Stats Widget -->
+<div class="p-6 space-y-6">
+<h3 class="text-sm font-semibold text-slate-800">Weekly Stats</h3>
+<div class="space-y-4">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-end mb-1">
+<span class="text-xs font-medium text-slate-500">Active Words</span>
+<span class="text-sm font-bold text-slate-900">5</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[25%] rounded-full"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-end mb-1">
+<span class="text-xs font-medium text-slate-500">Total Patterns</span>
+<span class="text-sm font-bold text-slate-900">12</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-slate-300 w-[60%] rounded-full"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-end mb-1">
+<span class="text-xs font-medium text-slate-500">Corrections</span>
+<span class="text-sm font-bold text-slate-900">47</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-emerald-400 w-[85%] rounded-full"></div>
+</div>
+<span class="text-[10px] text-emerald-600 font-medium text-right mt-1">+12% vs last week</span>
+</div>
+</div>
+<!-- Mini Tip -->
+<div class="mt-8 p-4 bg-yellow-50 rounded-lg border border-yellow-100 flex gap-3">
+<span class="material-symbols-outlined text-yellow-600 text-[20px] shrink-0">lightbulb</span>
+<div class="flex flex-col gap-1">
+<span class="text-xs font-bold text-yellow-800">Pro Tip</span>
+<p class="text-xs text-yellow-700 leading-normal">
+                        Add commonly misheard acronyms to improve dictation speed by 20%.
+                    </p>
+</div>
+</div>
+</div>
+</aside>
+</body></html>

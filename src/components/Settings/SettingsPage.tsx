@@ -1,8 +1,11 @@
 import { Show, For, createSignal } from 'solid-js';
 import type { Accessor, Setter, JSX } from 'solid-js';
 import type { Settings, Provider } from '../../types';
-import { PROVIDERS } from '../../constants';
+import { CHAT_MODELS, PROVIDERS } from '../../constants';
 import Select from './Select';
+
+/** In-memory model selection per provider. Resets on app start so defaults apply. */
+const providerModelMemory: Partial<Record<Provider, string>> = {};
 
 type SettingsPageProps = {
   settings: Accessor<Settings>;
@@ -12,6 +15,7 @@ type SettingsPageProps = {
   onTest: () => void;
   onSave: () => void;
   onSaveQuiet: () => void;
+  onTestAndSave: () => void;
 };
 
 const GroqIcon = (props: { class?: string }) => (
@@ -52,12 +56,34 @@ export default function SettingsPage(props: SettingsPageProps) {
 
   const onProviderChange = (provider: Provider) => {
     const config = PROVIDERS[provider];
-    props.setSettings((current) => ({
-      ...current,
-      provider,
-      base_url: config.base_url,
-      model: config.models[0] ?? ''
-    }));
+    const defaultChatModel = CHAT_MODELS[provider]?.[0] ?? '';
+    props.setSettings((current) => {
+      if (provider === current.provider) return current;
+
+      // Stash current model for the old provider
+      providerModelMemory[current.provider] = current.model;
+
+      const updatedKeys = {
+        ...current.provider_api_keys,
+        [current.provider]: current.api_key
+      };
+
+      // Restore previous model selection, or fall back to provider default
+      const restoredModel = providerModelMemory[provider] ?? config.models[0] ?? '';
+
+      return {
+        ...current,
+        provider,
+        base_url: config.base_url,
+        model: restoredModel,
+        api_key: updatedKeys[provider] ?? '',
+        provider_api_keys: updatedKeys,
+        modes: provider === 'custom'
+          ? current.modes
+          : current.modes.map((m) => ({ ...m, model: defaultChatModel })),
+      };
+    });
+    props.onTestAndSave();
   };
 
   /** Update a behavior field and auto-save immediately */
@@ -256,10 +282,10 @@ export default function SettingsPage(props: SettingsPageProps) {
               <button
                 type="button"
                 disabled={props.saving()}
-                onClick={props.onSave}
+                onClick={props.onTestAndSave}
                 class="px-6 py-2.5 rounded-lg text-sm font-semibold text-black bg-primary hover:bg-primary-dark disabled:opacity-50 transition-colors cursor-pointer"
               >
-                {props.saving() ? 'Saving...' : 'Save Provider'}
+                {props.saving() ? 'Testing...' : 'Save Provider'}
               </button>
             </div>
           </div>

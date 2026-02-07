@@ -157,10 +157,9 @@ export default function App() {
     await loadSettings();
 
     const unlistenDictation = await listen<DictationUpdate>('dictation:update', (event) => {
-      const payload = event.payload;
-      switch (payload.state) {
+        const payload = event.payload;
+        switch (payload.state) {
         case 'recording': {
-          if (!isHolding) break;
           setError('');
           setStatus('recording');
           break;

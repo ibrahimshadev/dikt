@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::path::PathBuf;
+use std::collections::HashMap;
 
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use serde::{Deserialize, Serialize};
@@ -22,6 +23,8 @@ pub struct AppSettings {
   #[serde(default = "default_copy_to_clipboard_on_success")]
   pub copy_to_clipboard_on_success: bool,
   pub api_key: String,
+  #[serde(default)]
+  pub provider_api_keys: HashMap<String, String>,
   #[serde(default)]
   pub vocabulary: Vec<VocabularyEntry>,
   #[serde(default)]
@@ -80,6 +83,8 @@ struct StoredSettings {
   #[serde(default)]
   encrypted_api_key: Option<String>,
   #[serde(default)]
+  encrypted_provider_api_keys: HashMap<String, String>,
+  #[serde(default)]
   vocabulary: Vec<VocabularyEntry>,
   #[serde(default)]
   active_mode_id: Option<String>,
@@ -97,6 +102,7 @@ impl Default for AppSettings {
       hotkey_mode: "hold".to_string(),
       copy_to_clipboard_on_success: false,
       api_key: String::new(),
+      provider_api_keys: HashMap::new(),
       vocabulary: Vec::new(),
       active_mode_id: None,
       modes: Vec::new(),
@@ -125,21 +131,47 @@ pub fn load_settings() -> AppSettings {
           }
         }
 
-        settings.provider = stored.provider;
-        settings.base_url = stored.base_url;
-        settings.model = stored.model;
-        settings.hotkey = stored.hotkey;
-        settings.hotkey_mode = stored.hotkey_mode;
-        settings.copy_to_clipboard_on_success = stored.copy_to_clipboard_on_success;
-        settings.vocabulary = stored.vocabulary;
-        settings.active_mode_id = stored.active_mode_id;
-        settings.modes = stored.modes;
+        let StoredSettings {
+          provider,
+          base_url,
+          model,
+          hotkey,
+          hotkey_mode,
+          copy_to_clipboard_on_success,
+          encrypted_api_key: _,
+          encrypted_provider_api_keys,
+          vocabulary,
+          active_mode_id,
+          modes,
+        } = stored;
+
+        settings.provider = provider;
+        settings.base_url = base_url;
+        settings.model = model;
+        settings.hotkey = hotkey;
+        settings.hotkey_mode = hotkey_mode;
+        settings.copy_to_clipboard_on_success = copy_to_clipboard_on_success;
+        settings.vocabulary = vocabulary;
+        settings.active_mode_id = active_mode_id;
+        settings.modes = modes;
+        for (provider, encrypted) in encrypted_provider_api_keys {
+          if let Some(decrypted) = decrypt_api_key(&encrypted) {
+            settings.provider_api_keys.insert(provider, decrypted);
+          }
+        }
         should_seed_default_modes = !has_modes_field;
       }
     }
   }
 
-  if let Ok(Some(api_key)) = get_api_key() {
+  if let Some(provider_key) = settings.provider_api_keys.get(&settings.provider).cloned() {
+    settings.api_key = provider_key;
+  } else if let Ok(Some(api_key)) = get_api_key() {
+    if !api_key.trim().is_empty() {
+      settings
+        .provider_api_keys
+        .insert(settings.provider.clone(), api_key.clone());
+    }
     settings.api_key = api_key;
   }
 
@@ -158,6 +190,21 @@ fn json_has_modes_field(contents: &str) -> bool {
 }
 
 pub fn save_settings(settings: &AppSettings) -> Result<(), String> {
+  let mut provider_api_keys = settings.provider_api_keys.clone();
+  if settings.api_key.trim().is_empty() {
+    provider_api_keys.remove(&settings.provider);
+  } else {
+    provider_api_keys.insert(settings.provider.clone(), settings.api_key.clone());
+  }
+
+  let mut encrypted_provider_api_keys = HashMap::new();
+  for (provider, api_key) in provider_api_keys {
+    if api_key.trim().is_empty() {
+      continue;
+    }
+    encrypted_provider_api_keys.insert(provider, encrypt_api_key(&api_key));
+  }
+
   let stored = StoredSettings {
     provider: settings.provider.clone(),
     base_url: settings.base_url.clone(),
@@ -166,6 +213,7 @@ pub fn save_settings(settings: &AppSettings) -> Result<(), String> {
     hotkey_mode: settings.hotkey_mode.clone(),
     copy_to_clipboard_on_success: settings.copy_to_clipboard_on_success,
     encrypted_api_key: None,
+    encrypted_provider_api_keys,
     vocabulary: settings.vocabulary.clone(),
     active_mode_id: settings.active_mode_id.clone(),
     modes: settings.modes.clone(),
@@ -300,6 +348,7 @@ fn store_encrypted_api_key_fallback(api_key: &str) -> Result<(), String> {
       hotkey_mode: "hold".to_string(),
       copy_to_clipboard_on_success: false,
       encrypted_api_key: None,
+      encrypted_provider_api_keys: HashMap::new(),
       vocabulary: Vec::new(),
       active_mode_id: None,
       modes: Vec::new(),
@@ -313,6 +362,7 @@ fn store_encrypted_api_key_fallback(api_key: &str) -> Result<(), String> {
       hotkey_mode: "hold".to_string(),
       copy_to_clipboard_on_success: false,
       encrypted_api_key: None,
+      encrypted_provider_api_keys: HashMap::new(),
       vocabulary: Vec::new(),
       active_mode_id: None,
       modes: Vec::new(),

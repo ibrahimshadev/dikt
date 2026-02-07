@@ -1,4 +1,4 @@
-import { createSignal, createEffect, createMemo, on, onCleanup, onMount, Switch, Match } from 'solid-js';
+import { createSignal, createEffect, createMemo, onCleanup, onMount, Switch, Match } from 'solid-js';
 import { invoke } from '@tauri-apps/api/core';
 import { emit, listen } from '@tauri-apps/api/event';
 
@@ -9,7 +9,8 @@ import {
   MAX_REPLACEMENTS_PER_ENTRY,
   MAX_VOCABULARY_ENTRIES
 } from './constants';
-import { Layout, SettingsPage, RightPanel, HistoryPage } from './components/Settings';
+import { DEFAULT_MODES } from './defaultModes';
+import { Layout, SettingsPage, RightPanel, HistoryPage, DictionaryPage, ModesPage } from './components/Settings';
 import type { HistoryStats } from './components/Settings';
 
 const createVocabularyId = (): string => {
@@ -45,6 +46,7 @@ const sanitizeVocabulary = (vocabulary: VocabularyEntry[]): VocabularyEntry[] =>
 
 export default function SettingsApp() {
   const [settings, setSettings] = createSignal<Settings>(DEFAULT_SETTINGS);
+  const [settingsLoaded, setSettingsLoaded] = createSignal(false);
   const [activeTab, setActiveTab] = createSignal<Tab>('settings');
   const [testMessage, setTestMessage] = createSignal('');
   const [vocabularyMessage, setVocabularyMessage] = createSignal('');
@@ -134,6 +136,20 @@ export default function SettingsApp() {
       setTestMessage(message);
     } catch (err) {
       setTestMessage(String(err));
+    }
+  };
+
+  const testAndSaveProvider = async () => {
+    setSaving(true);
+    setTestMessage('');
+    try {
+      const message = await invoke<string>('test_connection', { settings: settings() });
+      await saveSettingsQuiet();
+      setTestMessage(message);
+    } catch (err) {
+      setTestMessage(String(err));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -252,39 +268,46 @@ export default function SettingsApp() {
     if (tab !== 'history') {
       setHistorySearchQuery('');
     }
+    if (tab !== 'dictionary') {
+      cancelVocabularyEditor();
+    }
   };
 
-  const fetchModels = async () => {
+  const fetchModels = async (reconcileModes: boolean) => {
+    const provider = settings().provider;
+    const baseUrl = settings().base_url;
+    const apiKey = settings().api_key;
     setModelsLoading(true);
     setModelsError('');
     try {
       const result = await invoke<string[]>('fetch_provider_models', {
-        baseUrl: settings().base_url,
-        apiKey: settings().api_key
+        baseUrl,
+        apiKey
       });
-      const fallback = CHAT_MODELS[settings().provider] ?? [];
+      const fallback = CHAT_MODELS[provider] ?? [];
       const availableModels = result.length > 0 ? result : fallback;
       setModelsList(availableModels);
       setModelsError(result.length === 0 ? 'API returned no models, using defaults' : '');
-      if (settings().provider !== 'custom' && availableModels.length > 0) {
-        const firstModel = availableModels[0];
+      if (reconcileModes && provider !== 'custom' && availableModels.length > 0) {
+        const preferred = CHAT_MODELS[provider]?.[0] ?? availableModels[0];
+        const defaultModel = availableModels.includes(preferred) ? preferred : availableModels[0];
         setSettings((current) => ({
           ...current,
           modes: current.modes.map((mode) =>
-            availableModels.includes(mode.model) ? mode : { ...mode, model: firstModel }
+            availableModels.includes(mode.model) ? mode : { ...mode, model: defaultModel }
           )
         }));
       }
     } catch (err) {
       setModelsError('Model fetch failed: ' + String(err));
-      const fallback = CHAT_MODELS[settings().provider] ?? [];
+      const fallback = CHAT_MODELS[provider] ?? [];
       setModelsList(fallback);
-      if (settings().provider !== 'custom' && fallback.length > 0) {
-        const firstModel = fallback[0];
+      if (reconcileModes && provider !== 'custom' && fallback.length > 0) {
+        const defaultModel = fallback[0];
         setSettings((current) => ({
           ...current,
           modes: current.modes.map((mode) =>
-            fallback.includes(mode.model) ? mode : { ...mode, model: firstModel }
+            fallback.includes(mode.model) ? mode : { ...mode, model: defaultModel }
           )
         }));
       }
@@ -312,6 +335,7 @@ export default function SettingsApp() {
       const nextActiveModeId = current.active_mode_id === id ? null : current.active_mode_id;
       return { ...current, modes: nextModes, active_mode_id: nextActiveModeId };
     });
+    void saveSettingsQuiet();
   };
 
   const updateMode = (id: string, field: keyof Mode, value: string) => {
@@ -323,6 +347,16 @@ export default function SettingsApp() {
 
   const setActiveModeId = (id: string | null) => {
     setSettings((current) => ({ ...current, active_mode_id: id }));
+    void saveSettingsQuiet();
+  };
+
+  const resetModes = async () => {
+    setSettings((current) => ({
+      ...current,
+      modes: DEFAULT_MODES,
+      active_mode_id: null,
+    }));
+    await saveSettingsQuiet();
   };
 
   const openCreateVocabularyEditor = () => {
@@ -416,15 +450,15 @@ export default function SettingsApp() {
   };
 
   const provider = createMemo(() => settings().provider);
+  let isInitialLoad = true;
 
-  createEffect(on(
-    () => [provider(), activeTab()] as const,
-    ([_provider, tab]) => {
-      if (tab === 'modes') {
-        void fetchModels();
-      }
-    }
-  ));
+  createEffect(() => {
+    provider();
+    if (!settingsLoaded()) return;
+    const shouldReconcileModes = isInitialLoad;
+    if (shouldReconcileModes) isInitialLoad = false;
+    void fetchModels(shouldReconcileModes);
+  });
 
   onMount(async () => {
     const savedTheme = localStorage.getItem('dikt-theme');
@@ -433,6 +467,7 @@ export default function SettingsApp() {
     document.documentElement.classList.toggle('light', !dark);
 
     await loadSettings();
+    setSettingsLoaded(true);
     await loadHistory();
 
     const unlistenOpened = await listen('settings-window-opened', () => {
@@ -443,6 +478,10 @@ export default function SettingsApp() {
       void loadHistory();
     });
 
+    const unlistenHistoryUpdated = await listen('transcription-history-updated', () => {
+      void loadHistory();
+    });
+
     const unlistenHistoryError = await listen<string>('transcription-history-error', (event) => {
       setHistoryMessage(event.payload);
       void loadHistory();
@@ -450,20 +489,28 @@ export default function SettingsApp() {
 
     onCleanup(() => {
       void unlistenOpened();
+      void unlistenHistoryUpdated();
       void unlistenHistoryError();
     });
   });
 
-  const isHistoryTab = () => activeTab() === 'history';
+  const isFullBleedTab = () => activeTab() === 'history' || activeTab() === 'dictionary' || activeTab() === 'modes';
 
   return (
-    <Layout
-      activeTab={activeTab}
-      onTabChange={switchToTab}
-      rightPanel={isHistoryTab() ? undefined : <RightPanel activeTab={activeTab} />}
-      fullBleed={isHistoryTab()}
-      isDark={isDark}
-      onToggleTheme={toggleTheme}
+      <Layout
+        activeTab={activeTab}
+        onTabChange={switchToTab}
+        rightPanel={isFullBleedTab() ? undefined : (
+          <RightPanel
+            activeTab={activeTab}
+            modes={() => settings().modes}
+            activeModeId={() => settings().active_mode_id}
+            onSetActiveModeId={setActiveModeId}
+          />
+        )}
+        fullBleed={isFullBleedTab()}
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
     >
       <Switch>
         <Match when={activeTab() === 'settings'}>
@@ -475,9 +522,10 @@ export default function SettingsApp() {
             onTest={testConnection}
             onSave={saveSettings}
             onSaveQuiet={saveSettingsQuiet}
+            onTestAndSave={testAndSaveProvider}
           />
         </Match>
-        <Match when={isHistoryTab()}>
+        <Match when={activeTab() === 'history'}>
           <HistoryPage
             history={filteredHistory}
             totalCount={() => history().length}
@@ -491,11 +539,39 @@ export default function SettingsApp() {
             onClearAll={clearHistory}
           />
         </Match>
-        <Match when={activeTab() === 'vocabulary'}>
-          <div class="py-20 text-center text-gray-500">Vocabulary is coming soon.</div>
+        <Match when={activeTab() === 'dictionary'}>
+          <DictionaryPage
+            entries={() => settings().vocabulary}
+            message={vocabularyMessage}
+            isEditorOpen={isVocabularyEditorOpen}
+            editingId={editingVocabularyId}
+            editorWord={editorWord}
+            setEditorWord={setEditorWord}
+            editorReplacements={editorReplacements}
+            setEditorReplacements={setEditorReplacements}
+            onOpenCreate={openCreateVocabularyEditor}
+            onEdit={openEditVocabularyEditor}
+            onSave={saveVocabularyEntry}
+            onCancel={cancelVocabularyEditor}
+            onToggleEnabled={toggleVocabularyEntryEnabled}
+            onDelete={deleteVocabularyEntry}
+          />
         </Match>
         <Match when={activeTab() === 'modes'}>
-          <div class="py-20 text-center text-gray-500">Modes is coming soon.</div>
+          <ModesPage
+            modes={() => settings().modes}
+            activeModeId={() => settings().active_mode_id}
+            modelsList={modelsList}
+            modelsLoading={modelsLoading}
+            modelsError={modelsError}
+            onUpdateMode={updateMode}
+            onSetActiveModeId={setActiveModeId}
+            onAddMode={addMode}
+            onDeleteMode={deleteMode}
+            onResetModes={resetModes}
+            onSave={saveSettingsQuiet}
+            saving={saving}
+          />
         </Match>
       </Switch>
     </Layout>

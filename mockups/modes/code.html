@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>dikt Modes - Inline Accordion Management</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#10b77f",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#0a0a0a",
+                        "surface-dark": "#111111",
+                        "sidebar-dark": "#0d0e12",
+                        "border-dark": "#333333",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "4px",
+                        "sm": "2px",
+                        "lg": "8px",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for dark theme feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444; 
+        }
+    </style>
+</head>
+<body class="bg-background-dark text-white overflow-hidden h-screen flex">
+<!-- Sidebar -->
+<aside class="w-64 bg-sidebar-dark border-r border-border-dark flex flex-col justify-between flex-shrink-0">
+<div class="p-6">
+<!-- Logo area -->
+<div class="mb-10 flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">graphic_eq</span>
+<h1 class="text-xl font-bold tracking-tight text-white">dikt</h1>
+</div>
+<p class="text-xs text-zinc-500 font-mono ml-9">v1.2.0</p>
+</div>
+<!-- Navigation -->
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 rounded transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] text-zinc-500 group-hover:text-white transition-colors">settings</span>
+                    Settings
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 rounded transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] text-zinc-500 group-hover:text-white transition-colors">history</span>
+                    History
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 rounded transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] text-zinc-500 group-hover:text-white transition-colors">book</span>
+                    Dictionary
+                </a>
+<!-- Active Item -->
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-white bg-[#151f1b] border-l-2 border-primary rounded-r transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px] text-primary">tune</span>
+                    Modes
+                </a>
+</nav>
+</div>
+<!-- User Profile -->
+<div class="p-4 border-t border-border-dark">
+<div class="flex items-center gap-3 px-2 py-2 rounded hover:bg-white/5 cursor-pointer transition-colors">
+<div class="w-8 h-8 rounded bg-zinc-700 flex items-center justify-center text-xs font-semibold text-zinc-300">AM</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white">Alex Morgan</span>
+<span class="text-xs text-zinc-500">Pro Plan</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-background-dark p-8 lg:p-12 flex flex-col">
+<!-- Header Section -->
+<header class="flex flex-col gap-6 mb-8">
+<div class="flex justify-between items-start">
+<div class="flex flex-col gap-2">
+<h2 class="text-3xl font-bold tracking-tight text-white">Modes</h2>
+<p class="text-zinc-500 text-sm">AI-powered transcription formatting configurations.</p>
+</div>
+<button class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded text-sm font-medium transition-colors shadow-lg shadow-primary/10">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                    New Mode
+                </button>
+</div>
+<!-- Global Active Status -->
+<div class="flex items-center gap-2 text-xs font-semibold tracking-wider text-primary/80 uppercase">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                Active: Clean Draft
+            </div>
+</header>
+<!-- Accordion List -->
+<div class="flex flex-col gap-3 max-w-4xl">
+<!-- Item 1: Active & Collapsed -->
+<div class="group bg-surface-dark border border-border-dark rounded overflow-hidden relative transition-all hover:border-zinc-700">
+<!-- Active Indicator Strip -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-center p-4 gap-4">
+<!-- Icon -->
+<div class="w-10 h-10 rounded bg-[#1c2e27] flex items-center justify-center flex-shrink-0 text-primary">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<!-- Info -->
+<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 flex-1">
+<div class="flex items-center gap-3">
+<h3 class="text-base font-semibold text-white">Clean Draft</h3>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary border border-primary/20 tracking-wide">ACTIVE</span>
+</div>
+<div class="flex items-center gap-2 text-zinc-500 text-sm">
+<span class="px-2 py-1 rounded bg-zinc-800 border border-zinc-700 text-xs font-mono text-zinc-400">llama-3.3-70b-versatile</span>
+<span class="hidden md:inline-block w-1 h-1 rounded-full bg-zinc-700"></span>
+<span class="truncate max-w-[200px] text-zinc-600">Removes filler words and fixes grammar.</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-1 opacity-100 transition-opacity">
+<button class="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors mr-2">Deactivate</button>
+<button class="w-8 h-8 rounded hover:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded hover:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-red-400 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Item 2: Collapsed -->
+<div class="group bg-surface-dark border border-border-dark rounded overflow-hidden relative transition-all hover:border-zinc-700 hover:bg-[#161616]">
+<div class="flex items-center p-4 gap-4">
+<!-- Icon -->
+<div class="w-10 h-10 rounded bg-zinc-800 flex items-center justify-center flex-shrink-0 text-zinc-400 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">assignment</span>
+</div>
+<!-- Info -->
+<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 flex-1">
+<h3 class="text-base font-medium text-zinc-300 group-hover:text-white">Meeting Notes</h3>
+<div class="flex items-center gap-2 text-zinc-500 text-sm">
+<span class="px-2 py-1 rounded bg-zinc-800 border border-zinc-700 text-xs font-mono text-zinc-400">gpt-4o-mini</span>
+<span class="hidden md:inline-block w-1 h-1 rounded-full bg-zinc-700"></span>
+<span class="truncate max-w-[200px] text-zinc-600">Summarizes key points and action items.</span>
+</div>
+</div>
+<!-- Actions (Hidden by default, visible on hover) -->
+<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="px-3 py-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors mr-2">Activate</button>
+<button class="w-8 h-8 rounded hover:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded hover:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-red-400 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Item 3: Expanded (Editing) -->
+<div class="bg-surface-dark border border-zinc-700 rounded overflow-hidden shadow-2xl relative">
+<!-- Header of Card -->
+<div class="flex items-center p-4 gap-4 border-b border-border-dark bg-[#161616]">
+<div class="w-10 h-10 rounded bg-zinc-800 flex items-center justify-center flex-shrink-0 text-white">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<div class="flex-1">
+<h3 class="text-base font-semibold text-white">Email Composer</h3>
+<p class="text-xs text-zinc-500 mt-0.5">Editing configuration...</p>
+</div>
+<div class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</div>
+</div>
+<!-- Form Content -->
+<div class="p-6 flex flex-col gap-5">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<!-- Mode Name -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Mode Name</label>
+<input class="bg-background-dark border border-border-dark rounded px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none placeholder-zinc-600 transition-shadow" type="text" value="Email Composer"/>
+</div>
+<!-- Model Selection -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-medium text-zinc-400 uppercase tracking-wide">AI Model</label>
+<div class="relative">
+<select class="w-full bg-background-dark border border-border-dark rounded px-3 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary outline-none appearance-none cursor-pointer">
+<option>gpt-4o-mini</option>
+<option selected="">llama-3.3-70b-versatile</option>
+<option>claude-3-haiku</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-zinc-500 pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- System Prompt -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<label class="text-xs font-medium text-zinc-400 uppercase tracking-wide">System Prompt</label>
+<span class="text-[10px] text-zinc-600">Markdown supported</span>
+</div>
+<textarea class="bg-background-dark border border-border-dark rounded px-3 py-3 text-sm font-mono text-zinc-300 focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-none min-h-[140px] leading-relaxed" rows="5">You are an executive assistant helping to draft professional emails based on dictated notes. 
+
+Your goal is to convert informal speech into polished, concise, and polite email correspondence. Maintain a professional tone but avoid overly flowery language.
+
+Structure the output with:
+- Subject Line options
+- Email Body
+- Action Items (if any detected)</textarea>
+<p class="text-xs text-zinc-500 mt-1">This prompt instructs the AI on how to format and process your transcription.</p>
+</div>
+<!-- Footer Actions -->
+<div class="flex items-center justify-between pt-4 mt-2 border-t border-border-dark">
+<button class="text-xs font-medium text-red-400 hover:text-red-300 transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+                            Delete Mode
+                        </button>
+<div class="flex items-center gap-3">
+<button class="text-sm font-medium text-zinc-400 hover:text-white transition-colors px-3 py-2">Cancel</button>
+<button class="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded text-sm font-medium transition-colors shadow-lg shadow-primary/10 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">save</span>
+                                Save Changes
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 4: Collapsed -->
+<div class="group bg-surface-dark border border-border-dark rounded overflow-hidden relative transition-all hover:border-zinc-700 hover:bg-[#161616]">
+<div class="flex items-center p-4 gap-4">
+<!-- Icon -->
+<div class="w-10 h-10 rounded bg-zinc-800 flex items-center justify-center flex-shrink-0 text-zinc-400 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">code</span>
+</div>
+<!-- Info -->
+<div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 flex-1">
+<h3 class="text-base font-medium text-zinc-300 group-hover:text-white">Developer Log</h3>
+<div class="flex items-center gap-2 text-zinc-500 text-sm">
+<span class="px-2 py-1 rounded bg-zinc-800 border border-zinc-700 text-xs font-mono text-zinc-400">llama-3.3-70b-versatile</span>
+<span class="hidden md:inline-block w-1 h-1 rounded-full bg-zinc-700"></span>
+<span class="truncate max-w-[200px] text-zinc-600">Formats speech into commit messages or technical docs.</span>
+</div>
+</div>
+<!-- Actions (Hidden by default, visible on hover) -->
+<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="px-3 py-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors mr-2">Activate</button>
+<button class="w-8 h-8 rounded hover:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded hover:bg-white/5 flex items-center justify-center text-zinc-500 hover:text-red-400 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Tip -->
+<div class="mt-8 text-center border-t border-border-dark pt-6">
+<p class="text-xs text-zinc-600">Modes are applied automatically after transcription is complete. Local processing is used unless a cloud model is selected.</p>
+</div>
+</div>
+</main>
+</body></html>

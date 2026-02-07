@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>dikt Vocabulary - Emerald Dark Theme</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#10b77f", // Emerald Green
+                        "sidebar-bg": "#0f1419", // Deepest dark
+                        "main-bg": "#141a1f", // Main panel background
+                        "card-bg": "#1e242a", // Slightly lighter for cards
+                        "card-hover": "#252b32",
+                        "border-color": "#2d353b",
+                        "text-muted": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Prevent body scroll, handle inside panels */
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d353b; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f4952; 
+        }
+    </style>
+</head>
+<body class="bg-main-bg text-white h-screen w-full flex">
+<!-- LEFT SIDEBAR -->
+<aside class="w-[280px] h-full bg-sidebar-bg flex flex-col border-r border-border-color flex-shrink-0">
+<!-- Logo Area -->
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-size: 24px;">mic</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-white">dikt</h1>
+</div>
+<!-- Navigation -->
+<nav class="flex-1 px-4 py-4 flex flex-col gap-2">
+<!-- Settings -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-muted hover:bg-white/5 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-white transition-colors">settings</span>
+<span class="font-medium">Settings</span>
+</a>
+<!-- History -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-muted hover:bg-white/5 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-white transition-colors">schedule</span>
+<span class="font-medium">History</span>
+</a>
+<!-- Vocabulary (Active) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary transition-colors relative" href="#">
+<div class="absolute left-0 top-2 bottom-2 w-1 bg-primary rounded-r-full"></div>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">book_2</span>
+<span class="font-medium">Vocabulary</span>
+</a>
+<!-- Modes -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-muted hover:bg-white/5 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-white transition-colors">auto_awesome</span>
+<span class="font-medium">Modes</span>
+</a>
+</nav>
+<!-- User Profile -->
+<div class="p-4 mt-auto border-t border-border-color">
+<div class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Portrait of Alex Chen" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAJsnFpXazwws_CN-JAMIHxX85CaGw7wpyVpUIwnAtxjGo5jqZ9y8x-Lx4EA8ovLYsA0KS-40VYE_YhoczNBaTHjlSGf0rVPL4kZkeVJXS1YZ3VGCNq-Zl5qaQt8vZvbI_Y2UkTFGb1jBdPQAAnFRsjinTo0rpPiRJ5bjLoclIzSHEZL65v0nZCCfJHzlBArmBaAaTwDqsxlbtxaz6g6101NNtqW_mjaYjaIlHXz7AtZjyeKoWKTd52JrImio5PGlhDHsHEstEKdDw');"></div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white">Alex Chen</span>
+<span class="text-xs text-text-muted">Pro Plan</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- CENTER PANEL (MAIN CONTENT) -->
+<main class="flex-1 h-full bg-main-bg flex flex-col min-w-[500px] overflow-hidden">
+<!-- Header -->
+<header class="px-8 pt-8 pb-4">
+<h2 class="text-3xl font-bold text-white mb-2">Vocabulary</h2>
+<p class="text-text-muted text-sm font-normal">Custom word replacements for better transcription accuracy.</p>
+</header>
+<!-- Search & Filter -->
+<div class="px-8 py-4">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-text-muted">search</span>
+</div>
+<input class="block w-full pl-10 pr-32 py-3 bg-card-bg border border-border-color rounded-lg text-white placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Search words..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<span class="bg-primary/20 text-primary text-xs font-medium px-2 py-1 rounded-full border border-primary/20">5 active words</span>
+</div>
+</div>
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto px-8 pb-8 scrollbar-hide">
+<div class="flex flex-col gap-4">
+<!-- Expanded Card: Kubernetes -->
+<div class="bg-card-bg border border-primary/30 rounded-xl overflow-hidden shadow-lg shadow-black/20">
+<!-- Card Header (Always visible part) -->
+<div class="flex items-center justify-between p-5 border-b border-border-color bg-white/[0.02]">
+<div class="flex items-center gap-3">
+<span class="text-lg font-bold text-white">Kubernetes</span>
+<span class="bg-primary/20 text-primary text-xs px-2 py-0.5 rounded border border-primary/20">Editing</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-text-muted hover:text-white transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+<!-- Toggle Switch (On) -->
+<button class="w-11 h-6 bg-primary rounded-full relative transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-main-bg">
+<span class="absolute right-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm transition-transform"></span>
+</button>
+</div>
+</div>
+<!-- Expanded Form Content -->
+<div class="p-5 flex flex-col gap-5">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+<div class="md:col-span-1">
+<label class="block text-sm font-medium text-text-muted mb-2">Word</label>
+<input class="w-full bg-main-bg border border-border-color rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" type="text" value="Kubernetes"/>
+</div>
+<div class="md:col-span-2">
+<label class="block text-sm font-medium text-text-muted mb-2">Replacements (comma separated)</label>
+<textarea class="w-full h-24 bg-main-bg border border-border-color rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none leading-relaxed">cube annettes, kuber nettis, cooper netties</textarea>
+<p class="text-xs text-text-muted mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">info</span>
+                                    Add phonetic misspellings here.
+                                </p>
+</div>
+</div>
+<div class="flex justify-end gap-3 pt-2">
+<button class="px-4 py-2 text-sm font-medium text-text-muted hover:text-white transition-colors">Cancel</button>
+<button class="px-4 py-2 text-sm font-medium bg-primary hover:bg-emerald-500 text-white rounded-lg shadow-lg shadow-emerald-900/20 transition-all">Save Changes</button>
+</div>
+</div>
+</div>
+<!-- Collapsed Card: TypeScript -->
+<div class="bg-card-bg border border-border-color rounded-xl p-5 flex items-center justify-between hover:border-gray-600 transition-colors group cursor-pointer">
+<div class="flex flex-col gap-1">
+<span class="text-lg font-bold text-white">TypeScript</span>
+<span class="text-sm text-text-muted">3 replacement patterns</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+<button class="p-2 text-text-muted hover:text-white rounded-full hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-2 text-text-muted hover:text-red-400 rounded-full hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<!-- Toggle Switch (On) -->
+<div class="w-11 h-6 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm"></div>
+</div>
+</div>
+</div>
+<!-- Collapsed Card: PostgreSQL -->
+<div class="bg-card-bg border border-border-color rounded-xl p-5 flex items-center justify-between hover:border-gray-600 transition-colors group cursor-pointer">
+<div class="flex flex-col gap-1">
+<span class="text-lg font-bold text-white">PostgreSQL</span>
+<span class="text-sm text-text-muted">2 replacement patterns</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+<button class="p-2 text-text-muted hover:text-white rounded-full hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-2 text-text-muted hover:text-red-400 rounded-full hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<!-- Toggle Switch (On) -->
+<div class="w-11 h-6 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm"></div>
+</div>
+</div>
+</div>
+<!-- Collapsed Card: Supabase -->
+<div class="bg-card-bg border border-border-color rounded-xl p-5 flex items-center justify-between hover:border-gray-600 transition-colors group cursor-pointer">
+<div class="flex flex-col gap-1">
+<span class="text-lg font-bold text-white">Supabase</span>
+<span class="text-sm text-text-muted">1 replacement pattern</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+<button class="p-2 text-text-muted hover:text-white rounded-full hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-2 text-text-muted hover:text-red-400 rounded-full hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<!-- Toggle Switch (On) -->
+<div class="w-11 h-6 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 bg-white w-4 h-4 rounded-full shadow-sm"></div>
+</div>
+</div>
+</div>
+<!-- Collapsed Card: OAuth (Off) -->
+<div class="bg-card-bg border border-border-color rounded-xl p-5 flex items-center justify-between hover:border-gray-600 transition-colors group cursor-pointer opacity-70 hover:opacity-100">
+<div class="flex flex-col gap-1">
+<span class="text-lg font-bold text-white/60">OAuth</span>
+<span class="text-sm text-text-muted">4 replacement patterns</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+<button class="p-2 text-text-muted hover:text-white rounded-full hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="p-2 text-text-muted hover:text-red-400 rounded-full hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<!-- Toggle Switch (Off) -->
+<div class="w-11 h-6 bg-gray-600 rounded-full relative cursor-pointer">
+<div class="absolute left-1 top-1 bg-white/80 w-4 h-4 rounded-full shadow-sm"></div>
+</div>
+</div>
+</div>
+<!-- Add Button -->
+<button class="w-full py-4 border-2 border-dashed border-border-color rounded-xl text-text-muted hover:text-primary hover:border-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2 group mt-2">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">add_circle</span>
+<span class="font-medium">Add new word</span>
+</button>
+</div>
+</div>
+</main>
+<!-- RIGHT PANEL (CONTEXT & STATS) -->
+<aside class="w-[340px] h-full bg-main-bg border-l border-border-color flex-shrink-0 flex flex-col overflow-y-auto">
+<!-- How it works -->
+<div class="p-6 border-b border-border-color">
+<h3 class="text-xs font-bold text-text-muted tracking-widest uppercase mb-6">How it works</h3>
+<div class="relative pl-6 space-y-8">
+<!-- Line connector -->
+<div class="absolute left-[29px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-primary/50 to-primary/10 rounded-full"></div>
+<!-- Step 1 -->
+<div class="relative z-10">
+<div class="flex items-start gap-4">
+<div class="size-8 rounded-full bg-card-bg border border-border-color flex items-center justify-center text-text-muted shadow-sm flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">record_voice_over</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-muted">You say</span>
+<div class="bg-card-bg px-3 py-2 rounded-lg border border-border-color inline-block self-start">
+<span class="text-sm italic text-white/80">"cube annettes"</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Arrow Down -->
+<div class="pl-2.5">
+<span class="material-symbols-outlined text-primary">arrow_downward</span>
+</div>
+<!-- Step 2 -->
+<div class="relative z-10">
+<div class="flex items-start gap-4">
+<div class="size-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary shadow-sm flex-shrink-0 shadow-primary/20">
+<span class="material-symbols-outlined text-[18px]">rule</span>
+</div>
+<div class="flex flex-col gap-1 pt-1">
+<span class="text-sm font-medium text-primary">Pattern Match</span>
+<span class="text-xs text-text-muted">Found in vocabulary</span>
+</div>
+</div>
+</div>
+<!-- Arrow Down -->
+<div class="pl-2.5">
+<span class="material-symbols-outlined text-primary">arrow_downward</span>
+</div>
+<!-- Step 3 -->
+<div class="relative z-10">
+<div class="flex items-start gap-4">
+<div class="size-8 rounded-full bg-primary flex items-center justify-center text-black shadow-lg shadow-emerald-500/30 flex-shrink-0">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-text-muted">Output</span>
+<div class="bg-primary/10 px-3 py-2 rounded-lg border border-primary/20 inline-block self-start">
+<span class="text-sm font-bold text-white">Kubernetes</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Stats -->
+<div class="p-6 border-b border-border-color">
+<h3 class="text-xs font-bold text-text-muted tracking-widest uppercase mb-4">Activity Stats</h3>
+<div class="grid grid-cols-1 gap-3">
+<div class="bg-card-bg border border-border-color p-4 rounded-xl flex items-center justify-between">
+<div>
+<div class="text-2xl font-bold text-primary">47</div>
+<div class="text-xs text-text-muted">Corrections this week</div>
+</div>
+<span class="material-symbols-outlined text-primary/40">auto_fix_high</span>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-card-bg border border-border-color p-4 rounded-xl">
+<div class="text-xl font-bold text-white">12</div>
+<div class="text-xs text-text-muted mt-1">Total patterns</div>
+</div>
+<div class="bg-card-bg border border-border-color p-4 rounded-xl">
+<div class="text-xl font-bold text-white">5</div>
+<div class="text-xs text-text-muted mt-1">Active words</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Pro Tip -->
+<div class="p-6">
+<div class="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-xl p-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-[20px]">lightbulb</span>
+<span class="text-sm font-bold text-white">Pro Tip</span>
+</div>
+<p class="text-sm text-text-muted leading-relaxed">
+                    Add common misheard variations of technical terms for best results. Short acronyms often need phonetic spelling.
+                </p>
+</div>
+</div>
+</aside>
+</body></html>

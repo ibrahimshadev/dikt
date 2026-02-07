@@ -122,6 +122,7 @@ impl DictationSessionManager {
 
     let result = async {
       let wav_data = self.recorder.stop()?;
+      let local_duration = wav_duration_secs(&wav_data);
 
       let settings = self
         .settings
@@ -135,7 +136,7 @@ impl DictationSessionManager {
         .transcribe(&settings, wav_data, prompt.as_deref())
         .await?;
 
-      let duration_secs = transcription_result.duration_secs;
+      let duration_secs = transcription_result.duration_secs.or(local_duration);
       let language = transcription_result.language;
 
       let text = apply_vocabulary_replacements(&transcription_result.text, &settings.vocabulary);
@@ -315,6 +316,38 @@ fn build_word_boundary_pattern(replacement: &str) -> String {
 
 fn is_word_char(ch: char) -> bool {
   ch.is_alphanumeric() || ch == '_'
+}
+
+/// Extract duration from a WAV buffer by reading the header.
+/// Returns None if the buffer is too small or the byte rate is zero.
+fn wav_duration_secs(data: &[u8]) -> Option<f64> {
+  // Standard WAV: byte_rate is at offset 28 (4 bytes, little-endian).
+  // The "data" sub-chunk starts after the fmt chunk; its size gives the raw audio length.
+  if data.len() < 44 {
+    return None;
+  }
+
+  let byte_rate = u32::from_le_bytes(data[28..32].try_into().ok()?) as f64;
+  if byte_rate == 0.0 {
+    return None;
+  }
+
+  // Walk chunks starting at offset 12 to find the "data" chunk.
+  let mut pos = 12;
+  while pos + 8 <= data.len() {
+    let id = &data[pos..pos + 4];
+    let chunk_size = u32::from_le_bytes(data[pos + 4..pos + 8].try_into().ok()?) as f64;
+    if id == b"data" {
+      return Some(chunk_size / byte_rate);
+    }
+    pos += 8 + chunk_size as usize;
+    // Chunks are word-aligned
+    if pos % 2 != 0 {
+      pos += 1;
+    }
+  }
+
+  None
 }
 
 #[cfg(test)]

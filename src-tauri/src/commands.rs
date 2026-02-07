@@ -33,6 +33,26 @@ fn get_hwnd_value(window: &WebviewWindow) -> Option<isize> {
     window.hwnd().ok().map(|h| h.0 as isize)
 }
 
+/// Re-apply WS_EX_LAYERED + SetLayeredWindowAttributes on a raw HWND.
+/// Safe to call repeatedly — idempotent. This is the core recovery mechanism
+/// for the WebView2 transparent-window invisibility bug.
+#[cfg(target_os = "windows")]
+unsafe fn ensure_layered_visible(hwnd: windows::Win32::Foundation::HWND) {
+    use windows::Win32::Foundation::COLORREF;
+    use windows::Win32::UI::WindowsAndMessaging::*;
+
+    let ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+    if ex_style & WS_EX_LAYERED.0 as isize == 0 {
+        SetWindowLongPtrW(
+            hwnd,
+            GWL_EXSTYLE,
+            ex_style | WS_EX_LAYERED.0 as isize,
+        );
+    }
+    // Pin the layered window at full opacity so it stays visible.
+    let _ = SetLayeredWindowAttributes(hwnd, COLORREF(0), 255, LWA_ALPHA);
+}
+
 /// Initialize click-through for the main window.
 /// Ensures WS_EX_LAYERED is set once (with SetLayeredWindowAttributes to keep
 /// the window visible), then adds WS_EX_TRANSPARENT for click-through.
@@ -44,25 +64,32 @@ pub fn init_click_through(window: &WebviewWindow) {
         if let Some(hwnd_val) = get_hwnd_value(window) {
             let hwnd = windows::Win32::Foundation::HWND(hwnd_val);
             unsafe {
-                use windows::Win32::Foundation::COLORREF;
-                use windows::Win32::UI::WindowsAndMessaging::*;
-
-                // Ensure WS_EX_LAYERED is set (required for WS_EX_TRANSPARENT
-                // click-through to work with WebView2 child windows).
-                let ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
-                if ex_style & WS_EX_LAYERED.0 as isize == 0 {
-                    SetWindowLongPtrW(
-                        hwnd,
-                        GWL_EXSTYLE,
-                        ex_style | WS_EX_LAYERED.0 as isize,
-                    );
-                }
-                // Pin the layered window at full opacity so it stays visible.
-                let _ = SetLayeredWindowAttributes(hwnd, COLORREF(0), 255, LWA_ALPHA);
-
+                ensure_layered_visible(hwnd);
                 toggle_ex_transparent(hwnd, true);
             }
             CURSOR_PASSTHROUGH.store(true, std::sync::atomic::Ordering::Relaxed);
+        }
+    }
+}
+
+/// Full recovery for the main window: re-apply layered attributes, ensure
+/// always-on-top, and show the window. Called by reset_position and the
+/// periodic watchdog in the cursor tracker.
+#[allow(unused_variables)]
+pub fn ensure_main_visible(window: &WebviewWindow) {
+    let _ = window.show();
+    let _ = window.set_always_on_top(true);
+
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(hwnd_val) = get_hwnd_value(window) {
+            let hwnd = windows::Win32::Foundation::HWND(hwnd_val);
+            unsafe {
+                ensure_layered_visible(hwnd);
+                // Force Windows to repaint the window
+                use windows::Win32::Graphics::Gdi::InvalidateRect;
+                let _ = InvalidateRect(hwnd, None, true);
+            }
         }
     }
 }
@@ -92,6 +119,10 @@ pub async fn stop_and_transcribe(
 
     if let Some(message) = crate::transcription_history::take_runtime_error() {
         let _ = app.emit("transcription-history-error", message);
+    }
+
+    if result.is_ok() {
+        let _ = app.emit("transcription-history-updated", ());
     }
 
     result
@@ -230,7 +261,10 @@ pub fn set_cursor_passthrough(window: WebviewWindow, ignore: bool) -> Result<(),
 }
 
 /// Background thread that polls cursor position and re-enables cursor events
-/// when the cursor enters the pill's hot zone. Only active on Windows.
+/// when the cursor enters the pill's hot zone. Also acts as a watchdog:
+/// periodically re-applies SetLayeredWindowAttributes to prevent the window
+/// from becoming invisible due to WebView2 compositor surface loss.
+/// Only active on Windows.
 #[allow(unused_variables)]
 pub fn start_cursor_tracker(app: &AppHandle) {
     #[cfg(target_os = "windows")]
@@ -248,12 +282,27 @@ pub fn start_cursor_tracker(app: &AppHandle) {
 
         std::thread::spawn(move || {
             let hwnd = HWND(hwnd_val);
+            // Watchdog: re-apply SetLayeredWindowAttributes every ~30 seconds
+            // (600 ticks × 50ms) to recover from compositor surface loss.
+            let mut tick: u32 = 0;
+            const WATCHDOG_INTERVAL: u32 = 600;
 
             loop {
                 std::thread::sleep(std::time::Duration::from_millis(50));
 
                 if !unsafe { IsWindow(hwnd).as_bool() } {
+                    // Window handle became invalid (app shutting down).
                     break;
+                }
+
+                tick = tick.wrapping_add(1);
+
+                // Watchdog: periodically re-pin layered attributes to prevent
+                // the window from silently becoming invisible.
+                if tick % WATCHDOG_INTERVAL == 0 {
+                    unsafe {
+                        ensure_layered_visible(hwnd);
+                    }
                 }
 
                 if !CURSOR_PASSTHROUGH.load(std::sync::atomic::Ordering::Relaxed) {

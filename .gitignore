@@ -112,6 +112,7 @@ vite.config.ts.timestamp-*
 # =============================================================================
 *.local
 .aider*
+.claude
 TODO.md
 debug.log
 

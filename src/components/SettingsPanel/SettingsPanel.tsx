@@ -80,11 +80,11 @@ export default function SettingsPanel(props: SettingsPanelProps) {
             </button>
             <button
               class="tab-button"
-              classList={{ active: props.activeTab() === 'vocabulary' }}
-              onClick={() => props.onTabChange('vocabulary')}
+              classList={{ active: props.activeTab() === 'dictionary' }}
+              onClick={() => props.onTabChange('dictionary')}
               type="button"
             >
-              Vocabulary
+              Dictionary
             </button>
             <button
               class="tab-button"
@@ -126,7 +126,7 @@ export default function SettingsPanel(props: SettingsPanelProps) {
                     />
                   </Motion.div>
                 </Match>
-                <Match when={props.activeTab() === 'vocabulary'}>
+                <Match when={props.activeTab() === 'dictionary'}>
                   <Motion.div
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}

@@ -13,7 +13,7 @@ type SidebarProps = {
 const NAV_ITEMS: { tab: Tab; label: string; icon: string }[] = [
   { tab: 'settings', label: 'Settings', icon: 'settings' },
   { tab: 'history', label: 'History', icon: 'history' },
-  { tab: 'vocabulary', label: 'Vocabulary', icon: 'book_2' },
+  { tab: 'dictionary', label: 'Dictionary', icon: 'menu_book' },
   { tab: 'modes', label: 'Modes', icon: 'layers' },
 ];
 

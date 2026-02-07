@@ -1,5 +1,5 @@
 export type Status = 'idle' | 'recording' | 'transcribing' | 'formatting' | 'pasting' | 'done' | 'error';
-export type Tab = 'settings' | 'vocabulary' | 'history' | 'modes';
+export type Tab = 'settings' | 'dictionary' | 'history' | 'modes';
 export type Provider = 'groq' | 'openai' | 'custom';
 export type HotkeyMode = 'hold' | 'lock';
 
@@ -25,6 +25,7 @@ export type Settings = {
   hotkey_mode: HotkeyMode;
   copy_to_clipboard_on_success: boolean;
   api_key: string;
+  provider_api_keys: Partial<Record<Provider, string>>;
   vocabulary: VocabularyEntry[];
   active_mode_id: string | null;
   modes: Mode[];

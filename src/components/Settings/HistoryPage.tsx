@@ -23,7 +23,21 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
+  Mail,
+  Code,
 } from 'lucide-solid';
+import type { Component } from 'solid-js';
+
+import { MODE_NAME_COLORS } from '../../defaultModes';
+
+const MODE_NAME_LUCIDE: Record<string, Component<{ size: number }>> = {
+  'Clean Draft': Sparkles,
+  'Meeting Notes': ClipboardList,
+  'Email Composer': Mail,
+  'Developer Mode': Code,
+  'Developer Log': Code,
+};
 
 export type HistoryPageProps = {
   history: Accessor<TranscriptionHistoryItem[]>;
@@ -67,8 +81,16 @@ function HistoryItem(props: {
               Show original
               <ChevronDown size={12} class="group-open/details:rotate-180 transition-transform" />
             </summary>
-            <div class="mt-2 p-3 bg-black/20 rounded-md border-l-2 border-white/10 text-gray-500 text-sm break-words">
+            <div class="mt-2 p-3 bg-black/20 rounded-md border-l-2 border-white/10 text-gray-500 text-sm break-words relative group/original">
               {props.item.original_text}
+              <button
+                type="button"
+                onClick={() => props.onCopy(props.item.original_text!)}
+                class="absolute top-2 right-2 p-1 rounded-lg text-gray-600 hover:text-white hover:bg-white/10 transition-colors opacity-0 group-hover/original:opacity-100"
+                title="Copy original text"
+              >
+                <Copy size={14} />
+              </button>
             </div>
           </details>
         </Show>
@@ -88,8 +110,13 @@ function HistoryItem(props: {
           </div>
         </Show>
 
-        <div class="flex items-center gap-1">
-          {props.item.mode_name ? <Sparkles size={12} /> : <Mic size={12} />}
+        <div class={`flex items-center gap-1 ${MODE_NAME_COLORS[props.item.mode_name ?? ''] ?? ''}`}>
+          {(() => {
+            const name = props.item.mode_name;
+            if (!name) return <Mic size={12} />;
+            const Icon = MODE_NAME_LUCIDE[name];
+            return Icon ? <Icon size={12} /> : <Sparkles size={12} />;
+          })()}
           <span>{props.item.mode_name ?? 'Dictation'}</span>
         </div>
 
