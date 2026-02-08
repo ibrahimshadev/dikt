@@ -64,8 +64,16 @@ fn main() {
                 })
                 .build(app)?;
 
+            // Set crisp window icon (workaround: Tauri ICO parser only reads first entry)
+            let icon = tauri::image::Image::from_bytes(include_bytes!("../icons/128x128@2x.png"))
+                .expect("failed to load icon");
+            if let Some(window) = app.get_webview_window("settings") {
+                let _ = window.set_icon(icon.clone());
+            }
+
             // Position window at bottom center, enable click-through
             if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_icon(icon);
                 let _ = commands::position_window_bottom_internal(&window);
                 commands::init_click_through(&window);
             }
