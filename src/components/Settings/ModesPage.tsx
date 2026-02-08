@@ -16,7 +16,7 @@ export type ModesPageProps = {
   onAddMode: () => void;
   onDeleteMode: (id: string) => void;
   onResetModes: () => void;
-  onSave: () => void;
+  onSave: () => Promise<boolean>;
   saving: Accessor<boolean>;
 };
 
@@ -277,9 +277,11 @@ export default function ModesPage(props: ModesPageProps) {
     }
   };
 
-  const handleSave = () => {
-    props.onSave();
-    setEditingModeId(null);
+  const handleSave = async () => {
+    const saved = await props.onSave();
+    if (saved) {
+      setEditingModeId(null);
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -394,7 +396,7 @@ export default function ModesPage(props: ModesPageProps) {
                     modelOptions={modelOptions()}
                     onUpdateMode={(field, value) => props.onUpdateMode(mode().id, field, value)}
                     onCancel={() => setEditingModeId(null)}
-                    onSave={handleSave}
+                    onSave={() => void handleSave()}
                     onDelete={() => handleDelete(mode().id)}
                     saving={props.saving()}
                   />

@@ -1,6 +1,7 @@
 import { createSignal, createEffect, createMemo, onCleanup, onMount, Switch, Match } from 'solid-js';
 import { invoke } from '@tauri-apps/api/core';
 import { emit, listen } from '@tauri-apps/api/event';
+import { Toaster } from 'solid-sonner';
 
 import type { Settings, Tab, VocabularyEntry, TranscriptionHistoryItem, Mode } from './types';
 import {
@@ -12,6 +13,7 @@ import {
 import { DEFAULT_MODES } from './defaultModes';
 import { Layout, SettingsPage, RightPanel, HistoryPage, DictionaryPage, ModesPage } from './components/Settings';
 import type { HistoryStats } from './components/Settings';
+import { notifyError, notifyInfo, notifySuccess } from './lib/notify';
 
 const createVocabularyId = (): string => {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -48,20 +50,10 @@ export default function SettingsApp() {
   const [settings, setSettings] = createSignal<Settings>(DEFAULT_SETTINGS);
   const [settingsLoaded, setSettingsLoaded] = createSignal(false);
   const [activeTab, setActiveTab] = createSignal<Tab>('settings');
-  const [testMessage, setTestMessage] = createSignal('');
-  const [vocabularyMessage, setVocabularyMessage] = createSignal('');
   const [saving, setSaving] = createSignal(false);
 
   const [history, setHistory] = createSignal<TranscriptionHistoryItem[]>([]);
-  const [historyMessage, setHistoryMessage] = createSignal('');
   const [historySearchQuery, setHistorySearchQuery] = createSignal('');
-  let historyMessageTimer: ReturnType<typeof setTimeout> | undefined;
-
-  const flashHistoryMessage = (msg: string, ms = 2000) => {
-    clearTimeout(historyMessageTimer);
-    setHistoryMessage(msg);
-    historyMessageTimer = setTimeout(() => setHistoryMessage(''), ms);
-  };
 
   const [modelsList, setModelsList] = createSignal<string[]>([]);
   const [modelsLoading, setModelsLoading] = createSignal(false);
@@ -76,6 +68,11 @@ export default function SettingsApp() {
   const [editorWord, setEditorWord] = createSignal('');
   const [editorReplacements, setEditorReplacements] = createSignal('');
 
+  type SaveSettingsQuietOptions = {
+    notifyOnError?: boolean;
+    errorMessage?: string;
+  };
+
   const loadSettings = async () => {
     try {
       const result = await invoke<Settings>('get_settings');
@@ -83,23 +80,22 @@ export default function SettingsApp() {
       const vocabulary = sanitizeVocabulary(Array.isArray(merged.vocabulary) ? merged.vocabulary : []);
       setSettings({ ...merged, vocabulary });
     } catch (err) {
-      setTestMessage(String(err));
+      notifyError(err, 'Failed to load settings.');
     }
   };
 
   const closeSettingsWindow = async () => {
     setActiveTab('settings');
-    setVocabularyMessage('');
     setIsVocabularyEditorOpen(false);
     setEditingVocabularyId(null);
     try {
       await invoke('hide_settings_window');
     } catch (err) {
-      setTestMessage(String(err));
+      notifyError(err, 'Failed to close settings window.');
     }
   };
 
-  const saveSettingsQuiet = async () => {
+  const saveSettingsQuiet = async (options: SaveSettingsQuietOptions = {}): Promise<boolean> => {
     try {
       const sanitizedSettings = {
         ...settings(),
@@ -108,13 +104,17 @@ export default function SettingsApp() {
       await invoke('save_settings', { settings: sanitizedSettings });
       setSettings(sanitizedSettings);
       await emit('settings-updated');
-    } catch (_) { /* silent */ }
+      return true;
+    } catch (err) {
+      if (options.notifyOnError) {
+        notifyError(err, options.errorMessage ?? 'Failed to save settings.');
+      }
+      return false;
+    }
   };
 
   const saveSettings = async () => {
     setSaving(true);
-    setTestMessage('');
-    setVocabularyMessage('');
     try {
       const sanitizedSettings = {
         ...settings(),
@@ -125,34 +125,47 @@ export default function SettingsApp() {
       await emit('settings-updated');
       await closeSettingsWindow();
     } catch (err) {
-      setTestMessage(String(err));
+      notifyError(err, 'Failed to save settings.');
     } finally {
       setSaving(false);
     }
   };
 
   const testConnection = async () => {
-    setTestMessage('');
     try {
       const message = await invoke<string>('test_connection', { settings: settings() });
-      setTestMessage(message);
+      notifySuccess(message);
     } catch (err) {
-      setTestMessage(String(err));
+      notifyError(err, 'Connection test failed.');
     }
   };
 
   const testAndSaveProvider = async () => {
     setSaving(true);
-    setTestMessage('');
     try {
       const message = await invoke<string>('test_connection', { settings: settings() });
-      await saveSettingsQuiet();
-      setTestMessage(message);
+      const saved = await saveSettingsQuiet({
+        notifyOnError: true,
+        errorMessage: 'Connection test passed, but saving provider failed.',
+      });
+      if (!saved) return;
+      notifySuccess(message);
     } catch (err) {
-      setTestMessage(String(err));
+      notifyError(err, 'Provider test failed.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const saveModes = async (): Promise<boolean> => {
+    const saved = await saveSettingsQuiet({
+      notifyOnError: true,
+      errorMessage: 'Failed to save mode changes.',
+    });
+    if (saved) {
+      notifySuccess('Mode changes saved.');
+    }
+    return saved;
   };
 
   const persistVocabulary = async (nextVocabulary: VocabularyEntry[], message?: string) => {
@@ -160,10 +173,10 @@ export default function SettingsApp() {
     try {
       await invoke('save_vocabulary', { vocabulary: sanitizedVocabulary });
       setSettings((current) => ({ ...current, vocabulary: sanitizedVocabulary }));
-      if (message) setVocabularyMessage(message);
+      if (message) notifySuccess(message);
       return true;
     } catch (err) {
-      setVocabularyMessage(String(err));
+      notifyError(err, 'Failed to save vocabulary.');
       return false;
     }
   };
@@ -173,7 +186,7 @@ export default function SettingsApp() {
       const items = await invoke<TranscriptionHistoryItem[]>('get_transcription_history');
       setHistory(items);
     } catch (err) {
-      setHistoryMessage(String(err));
+      notifyError(err, 'Failed to load history.');
     }
   };
 
@@ -181,9 +194,9 @@ export default function SettingsApp() {
     try {
       await invoke('delete_transcription_history_item', { id });
       setHistory((prev) => prev.filter((item) => item.id !== id));
-      flashHistoryMessage('Entry deleted.');
+      notifySuccess('Entry deleted.');
     } catch (err) {
-      setHistoryMessage(String(err));
+      notifyError(err, 'Failed to delete history entry.');
     }
   };
 
@@ -191,18 +204,18 @@ export default function SettingsApp() {
     try {
       await invoke('clear_transcription_history');
       setHistory([]);
-      flashHistoryMessage('History cleared.');
+      notifySuccess('History cleared.');
     } catch (err) {
-      setHistoryMessage(String(err));
+      notifyError(err, 'Failed to clear history.');
     }
   };
 
   const copyHistoryText = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      flashHistoryMessage('Copied to clipboard.');
+      notifySuccess('Copied to clipboard.');
     } catch (err) {
-      setHistoryMessage('Failed to copy: ' + String(err));
+      notifyError(err, 'Failed to copy to clipboard.');
     }
   };
 
@@ -264,9 +277,6 @@ export default function SettingsApp() {
 
   const switchToTab = (tab: Tab) => {
     setActiveTab(tab);
-    setTestMessage('');
-    setVocabularyMessage('');
-    setHistoryMessage('');
     if (tab !== 'history') {
       setHistorySearchQuery('');
     }
@@ -363,13 +373,12 @@ export default function SettingsApp() {
 
   const openCreateVocabularyEditor = () => {
     if (settings().vocabulary.length >= MAX_VOCABULARY_ENTRIES) {
-      setVocabularyMessage(`Maximum ${MAX_VOCABULARY_ENTRIES} entries reached.`);
+      notifyInfo(`Maximum ${MAX_VOCABULARY_ENTRIES} entries reached.`);
       return;
     }
     setEditingVocabularyId(null);
     setEditorWord('');
     setEditorReplacements('');
-    setVocabularyMessage('');
     setIsVocabularyEditorOpen(true);
   };
 
@@ -377,7 +386,6 @@ export default function SettingsApp() {
     setEditingVocabularyId(entry.id);
     setEditorWord(entry.word);
     setEditorReplacements(entry.replacements.join('\n'));
-    setVocabularyMessage('');
     setIsVocabularyEditorOpen(true);
   };
 
@@ -385,14 +393,13 @@ export default function SettingsApp() {
     setEditingVocabularyId(null);
     setEditorWord('');
     setEditorReplacements('');
-    setVocabularyMessage('');
     setIsVocabularyEditorOpen(false);
   };
 
   const saveVocabularyEntry = async () => {
     const word = editorWord().trim();
     if (!word) {
-      setVocabularyMessage('Word is required.');
+      notifyError('Word is required.');
       return;
     }
 
@@ -441,7 +448,6 @@ export default function SettingsApp() {
     );
     const saved = await persistVocabulary(nextVocabulary);
     if (!saved) return;
-    setVocabularyMessage('');
   };
 
   const toggleTheme = () => {
@@ -473,9 +479,6 @@ export default function SettingsApp() {
     await loadHistory();
 
     const unlistenOpened = await listen('settings-window-opened', () => {
-      setTestMessage('');
-      setVocabularyMessage('');
-      setHistoryMessage('');
       void loadSettings();
       void loadHistory();
     });
@@ -485,7 +488,7 @@ export default function SettingsApp() {
     });
 
     const unlistenHistoryError = await listen<string>('transcription-history-error', (event) => {
-      setHistoryMessage(event.payload);
+      notifyError(event.payload);
       void loadHistory();
     });
 
@@ -507,6 +510,15 @@ export default function SettingsApp() {
   const isFullBleedTab = () => activeTab() === 'history' || activeTab() === 'dictionary' || activeTab() === 'modes';
 
   return (
+    <>
+      <Toaster
+        theme={isDark() ? 'dark' : 'light'}
+        position="top-right"
+        richColors
+        duration={2200}
+        visibleToasts={5}
+        closeButton
+      />
       <Layout
         activeTab={activeTab}
         onTabChange={switchToTab}
@@ -528,7 +540,6 @@ export default function SettingsApp() {
           <SettingsPage
             settings={settings}
             setSettings={setSettings}
-            testMessage={testMessage}
             saving={saving}
             onTest={testConnection}
             onSave={saveSettings}
@@ -542,7 +553,6 @@ export default function SettingsApp() {
             totalCount={() => history().length}
             todayCount={() => historyStats().todayCount}
             totalAudioSecs={() => historyStats().totalAudioSecs}
-            message={historyMessage}
             searchQuery={historySearchQuery}
             onSearchQueryChange={(value) => setHistorySearchQuery(value)}
             onCopy={copyHistoryText}
@@ -553,7 +563,6 @@ export default function SettingsApp() {
         <Match when={activeTab() === 'dictionary'}>
           <DictionaryPage
             entries={() => settings().vocabulary}
-            message={vocabularyMessage}
             isEditorOpen={isVocabularyEditorOpen}
             editingId={editingVocabularyId}
             editorWord={editorWord}
@@ -580,11 +589,12 @@ export default function SettingsApp() {
             onAddMode={addMode}
             onDeleteMode={deleteMode}
             onResetModes={resetModes}
-            onSave={saveSettingsQuiet}
+            onSave={saveModes}
             saving={saving}
           />
         </Match>
       </Switch>
     </Layout>
+    </>
   );
 }

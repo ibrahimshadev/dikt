@@ -3,6 +3,7 @@ import type { Accessor, Setter, JSX } from 'solid-js';
 import type { Settings, Provider } from '../../types';
 import { CHAT_MODELS, PROVIDERS } from '../../constants';
 import { CircleCheck } from 'lucide-solid';
+import { notifyError, notifySuccess } from '../../lib/notify';
 import Select from './Select';
 
 /** In-memory model selection per provider. Resets on app start so defaults apply. */
@@ -11,7 +12,6 @@ const providerModelMemory: Partial<Record<Provider, string>> = {};
 type SettingsPageProps = {
   settings: Accessor<Settings>;
   setSettings: Setter<Settings>;
-  testMessage: Accessor<string>;
   saving: Accessor<boolean>;
   onTest: () => void;
   onSave: () => void;
@@ -95,6 +95,16 @@ export default function SettingsPage(props: SettingsPageProps) {
 
   const providerConfig = () => PROVIDERS[props.settings().provider];
   const keyUrl = () => PROVIDER_KEY_URLS[props.settings().provider];
+  const copyKeyUrl = async () => {
+    const url = keyUrl();
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      notifySuccess('Copied key URL.');
+    } catch (err) {
+      notifyError(err, 'Failed to copy key URL.');
+    }
+  };
 
   return (
     <>
@@ -212,14 +222,13 @@ export default function SettingsPage(props: SettingsPageProps) {
               <div class="flex justify-between items-center px-1">
                 <label class="text-xs text-gray-500 font-medium">API KEY</label>
                 <Show when={keyUrl()}>
-                  <a
-                    href={keyUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => void copyKeyUrl()}
                     class="text-xs text-primary hover:underline cursor-pointer"
                   >
                     Get key
-                  </a>
+                  </button>
                 </Show>
               </div>
               <div class="relative">
@@ -260,18 +269,6 @@ export default function SettingsPage(props: SettingsPageProps) {
 
           {/* Provider Actions */}
           <div class="mt-5">
-            <Show when={props.testMessage()}>
-              <div class={`text-sm px-4 py-3 rounded-lg mb-4 border ${
-                props.testMessage().toLowerCase().includes('error') ||
-                props.testMessage().toLowerCase().includes('fail') ||
-                props.testMessage().toLowerCase().includes('missing')
-                  ? 'text-red-400 bg-red-500/5 border-red-500/20'
-                  : 'text-primary bg-primary/5 border-primary/20'
-              }`}>
-                {props.testMessage()}
-              </div>
-            </Show>
-
             <div class="flex items-center justify-end gap-4">
               <button
                 type="button"

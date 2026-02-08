@@ -14,7 +14,6 @@ import {
 
 export type DictionaryPageProps = {
   entries: Accessor<VocabularyEntry[]>;
-  message: Accessor<string>;
   isEditorOpen: Accessor<boolean>;
   editingId: Accessor<string | null>;
   editorWord: Accessor<string>;
@@ -27,11 +26,6 @@ export type DictionaryPageProps = {
   onCancel: () => void;
   onToggleEnabled: (id: string) => void;
   onDelete: (id: string) => void;
-};
-
-const isMessageError = (message: string): boolean => {
-  const normalized = message.toLowerCase();
-  return normalized.includes('error') || normalized.includes('fail') || normalized.includes('missing');
 };
 
 function ToggleSwitch(props: { enabled: boolean; onToggle: () => void }) {
@@ -271,21 +265,6 @@ export default function DictionaryPage(props: DictionaryPageProps) {
           </div>
         </div>
       </div>
-
-      {/* Message */}
-      <Show when={props.message()}>
-        {(message) => (
-          <div class="px-6 sm:px-10 pt-4">
-            <div class={`max-w-4xl mx-auto text-sm px-4 py-3 rounded-lg border ${
-              isMessageError(message())
-                ? 'text-red-400 bg-red-500/5 border-red-500/20'
-                : 'text-primary bg-primary/5 border-primary/20'
-            }`}>
-              {message()}
-            </div>
-          </div>
-        )}
-      </Show>
 
       {/* Content */}
       <Show
