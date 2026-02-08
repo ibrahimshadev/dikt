@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/ibrahimshadev/dikt/compare/v1.15.0...v1.16.0) (2026-02-08)
+
+
+### Features
+
+* **audio:** add live mic visualizer to settings panel ([1418f7f](https://github.com/ibrahimshadev/dikt/commit/1418f7f41a8c5cd3e56001a3bfa1e2759a6106cb))
+
 # [1.15.0](https://github.com/ibrahimshadev/dikt/compare/v1.14.0...v1.15.0) (2026-02-07)
 
 
