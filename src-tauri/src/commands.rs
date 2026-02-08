@@ -5,6 +5,12 @@ use crate::settings::AppSettings;
 use crate::state::AppState;
 use crate::transcription_history::TranscriptionHistoryItem;
 
+#[derive(serde::Serialize, Clone)]
+struct AudioLevelPayload {
+    rms_db: f32,
+    peak_db: f32,
+}
+
 #[cfg(target_os = "windows")]
 static CURSOR_PASSTHROUGH: std::sync::atomic::AtomicBool =
     std::sync::atomic::AtomicBool::new(true);
@@ -258,6 +264,26 @@ pub fn set_cursor_passthrough(window: WebviewWindow, ignore: bool) -> Result<(),
     }
     let _ = (&window, ignore);
     Ok(())
+}
+
+/// Background thread that broadcasts audio level events at ~20 FPS while recording.
+/// Both the main window and settings window can subscribe to `audio:level`.
+/// Exits when the main window is destroyed (app shutting down).
+pub fn start_audio_level_emitter(app: &AppHandle) {
+    let app = app.clone();
+    std::thread::spawn(move || {
+        loop {
+            std::thread::sleep(std::time::Duration::from_millis(50));
+            if app.get_webview_window("main").is_none() {
+                break;
+            }
+            if !crate::audio::is_recording() {
+                continue;
+            }
+            let (rms_db, peak_db) = crate::audio::current_level();
+            let _ = app.emit("audio:level", AudioLevelPayload { rms_db, peak_db });
+        }
+    });
 }
 
 /// Background thread that polls cursor position and re-enables cursor events

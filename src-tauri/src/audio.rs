@@ -1,6 +1,6 @@
 use std::io::Cursor;
 use std::sync::{
-    atomic::{AtomicBool, Ordering},
+    atomic::{AtomicBool, AtomicU32, Ordering},
     Arc, Mutex,
 };
 use std::thread::{self, JoinHandle};
@@ -8,6 +8,30 @@ use std::thread::{self, JoinHandle};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::SampleFormat;
 use hound::{SampleFormat as WavSampleFormat, WavSpec, WavWriter};
+
+// Lock-free audio level metering: written by CPAL callback, read by emitter thread.
+const SILENT_DB: f32 = -60.0;
+static LEVEL_RMS: AtomicU32 = AtomicU32::new(SILENT_DB.to_bits());
+static LEVEL_PEAK: AtomicU32 = AtomicU32::new(SILENT_DB.to_bits());
+static RECORDING_ACTIVE: AtomicBool = AtomicBool::new(false);
+
+/// Read the current audio level (RMS and peak in dB). Returns (-60, -60) when silent.
+pub fn current_level() -> (f32, f32) {
+    (
+        f32::from_bits(LEVEL_RMS.load(Ordering::Relaxed)),
+        f32::from_bits(LEVEL_PEAK.load(Ordering::Relaxed)),
+    )
+}
+
+/// Whether the recorder is actively capturing audio.
+pub fn is_recording() -> bool {
+    RECORDING_ACTIVE.load(Ordering::Relaxed)
+}
+
+fn reset_levels() {
+    LEVEL_RMS.store(SILENT_DB.to_bits(), Ordering::Relaxed);
+    LEVEL_PEAK.store(SILENT_DB.to_bits(), Ordering::Relaxed);
+}
 
 pub struct AudioRecorder {
     samples: Arc<Mutex<Vec<i16>>>,
@@ -34,6 +58,8 @@ impl AudioRecorder {
         }
 
         self.samples.lock().unwrap().clear();
+        reset_levels();
+        RECORDING_ACTIVE.store(true, Ordering::Relaxed);
         self.recording.store(true, Ordering::SeqCst);
 
         let samples = Arc::clone(&self.samples);
@@ -61,6 +87,8 @@ impl AudioRecorder {
 
     pub fn stop(&self) -> Result<Vec<u8>, String> {
         self.recording.store(false, Ordering::SeqCst);
+        RECORDING_ACTIVE.store(false, Ordering::Relaxed);
+        reset_levels();
 
         // Wait for the audio thread to finish
         if let Some(handle) = self.thread_handle.lock().unwrap().take() {
@@ -194,17 +222,45 @@ where
         return;
     }
 
+    let mut sum_sq: f64 = 0.0;
+    let mut max_abs: u16 = 0;
+    let mut frame_count: usize = 0;
+
     if let Ok(mut buffer) = samples.lock() {
         for frame in data.chunks(channels) {
             let mut acc = 0i32;
-            let mut count = 0i32;
+            let mut ch_count = 0i32;
             for &sample in frame {
                 acc += convert(sample) as i32;
-                count += 1;
+                ch_count += 1;
             }
-            if count > 0 {
-                buffer.push((acc / count) as i16);
+            if ch_count > 0 {
+                let mono = (acc / ch_count) as i16;
+                buffer.push(mono);
+                sum_sq += (mono as f64) * (mono as f64);
+                let abs = mono.unsigned_abs();
+                if abs > max_abs {
+                    max_abs = abs;
+                }
+                frame_count += 1;
             }
         }
+    }
+
+    if frame_count > 0 {
+        let norm = i16::MAX as f64;
+        let rms = (sum_sq / frame_count as f64).sqrt();
+        let rms_db = if rms > 0.0 {
+            (20.0 * (rms / norm).log10()).max(-60.0) as f32
+        } else {
+            SILENT_DB
+        };
+        let peak_db = if max_abs > 0 {
+            (20.0 * (max_abs as f64 / norm).log10()).max(-60.0) as f32
+        } else {
+            SILENT_DB
+        };
+        LEVEL_RMS.store(rms_db.to_bits(), Ordering::Relaxed);
+        LEVEL_PEAK.store(peak_db.to_bits(), Ordering::Relaxed);
     }
 }

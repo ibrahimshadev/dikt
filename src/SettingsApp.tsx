@@ -68,6 +68,8 @@ export default function SettingsApp() {
   const [modelsError, setModelsError] = createSignal('');
 
   const [isDark, setIsDark] = createSignal(true);
+  const [audioLevel, setAudioLevel] = createSignal<{ rms_db: number; peak_db: number } | null>(null);
+  let audioLevelTimer: ReturnType<typeof setTimeout> | undefined;
 
   const [isVocabularyEditorOpen, setIsVocabularyEditorOpen] = createSignal(false);
   const [editingVocabularyId, setEditingVocabularyId] = createSignal<string | null>(null);
@@ -487,10 +489,18 @@ export default function SettingsApp() {
       void loadHistory();
     });
 
+    const unlistenAudioLevel = await listen<{ rms_db: number; peak_db: number }>('audio:level', (event) => {
+      setAudioLevel(event.payload);
+      clearTimeout(audioLevelTimer);
+      audioLevelTimer = setTimeout(() => setAudioLevel(null), 150);
+    });
+
     onCleanup(() => {
       void unlistenOpened();
       void unlistenHistoryUpdated();
       void unlistenHistoryError();
+      void unlistenAudioLevel();
+      clearTimeout(audioLevelTimer);
     });
   });
 
@@ -506,6 +516,7 @@ export default function SettingsApp() {
             modes={() => settings().modes}
             activeModeId={() => settings().active_mode_id}
             onSetActiveModeId={setActiveModeId}
+            audioLevel={audioLevel}
           />
         )}
         fullBleed={isFullBleedTab()}

@@ -70,6 +70,7 @@ fn main() {
                 commands::init_click_through(&window);
             }
             commands::start_cursor_tracker(app.handle());
+            commands::start_audio_level_emitter(app.handle());
 
             if let Some(settings_window) = app.get_webview_window("settings") {
                 let app_handle = app.handle().clone();
