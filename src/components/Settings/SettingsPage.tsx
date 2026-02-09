@@ -357,16 +357,29 @@ export default function SettingsPage(props: SettingsPageProps) {
                 <span class="text-sm font-medium text-gray-200">Output Action</span>
                 <span class="text-xs text-gray-500">What happens after transcription</span>
               </div>
-              <div class="w-56">
-                <Select
-                  value={props.settings().copy_to_clipboard_on_success ? 'copy' : 'paste'}
-                  options={[
-                    { value: 'paste', label: 'Paste at cursor' },
-                    { value: 'copy', label: 'Paste + copy to clipboard' },
-                  ]}
-                  onChange={(value) => setBehavior('copy_to_clipboard_on_success', value === 'copy')}
-                  class="pl-3 pr-8"
-                />
+              <div class="flex bg-input-bg p-1 rounded-lg border border-white/15">
+                <button
+                  type="button"
+                  onClick={() => setBehavior('copy_to_clipboard_on_success', false)}
+                  class={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                    !props.settings().copy_to_clipboard_on_success
+                      ? 'bg-white/10 text-white shadow-sm'
+                      : 'text-gray-500 hover:text-gray-300'
+                  }`}
+                >
+                  Paste
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBehavior('copy_to_clipboard_on_success', true)}
+                  class={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                    props.settings().copy_to_clipboard_on_success
+                      ? 'bg-white/10 text-white shadow-sm'
+                      : 'text-gray-500 hover:text-gray-300'
+                  }`}
+                >
+                  Paste + Copy
+                </button>
               </div>
             </div>
           </div>
