@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Voxly - Open Source AI Voice Dictation</title>
+<meta name="description" content="Hold a hotkey, speak, release. Your words are transcribed, cleaned up by AI, and pasted into whatever app you're using. Open source, free forever."/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    primary: "#10b77f",
+                    "primary-dark": "#0d9265",
+                    "background-dark": "#0a0a0a",
+                    "surface-dark": "#111111",
+                    "surface-border": "#27272a",
+                },
+                fontFamily: {
+                    display: ["Inter", "sans-serif"],
+                    mono: ["JetBrains Mono", "monospace"],
+                },
+                borderRadius: {
+                    DEFAULT: "0.25rem",
+                    lg: "0.5rem",
+                    xl: "0.75rem",
+                },
+                backgroundImage: {
+                    'glow-gradient': 'radial-gradient(circle at center, rgba(16, 183, 127, 0.15) 0%, rgba(10, 10, 10, 0) 70%)',
+                }
+            },
+        },
+    }
+</script>
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0a0a0a;
+        color: #ffffff;
+    }
+    .code-syntax-blue { color: #61afef; }
+    .code-syntax-purple { color: #c678dd; }
+    .code-syntax-green { color: #98c379; }
+    .code-syntax-yellow { color: #e5c07b; }
+    .code-syntax-red { color: #e06c75; }
+    .code-syntax-grey { color: #5c6370; }
+</style>
+</head>
+<body class="bg-background-dark text-white antialiased overflow-x-hidden">
+
+<!-- Navbar -->
+<header class="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-md">
+<div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+        <div class="text-primary">
+            <span class="material-symbols-outlined text-3xl">mic</span>
+        </div>
+        <h1 class="text-xl font-bold tracking-tight">Voxly</h1>
+    </div>
+    <nav class="hidden md:flex items-center gap-8">
+        <a class="text-sm font-medium text-gray-400 hover:text-white transition-colors" href="#features">Features</a>
+        <a class="text-sm font-medium text-gray-400 hover:text-white transition-colors" href="#showcase">Modes</a>
+        <a class="text-sm font-medium text-gray-400 hover:text-white transition-colors" href="#comparison">Comparison</a>
+        <a class="text-sm font-medium text-gray-400 hover:text-white transition-colors flex items-center gap-1" href="https://github.com/ibrahimshadev/dikt" target="_blank" rel="noopener noreferrer">
+            GitHub <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+        </a>
+    </nav>
+    <div>
+        <a href="https://github.com/ibrahimshadev/dikt/releases" target="_blank" rel="noopener noreferrer" class="bg-primary hover:bg-primary-dark text-[#0a0a0a] px-5 py-2 rounded text-sm font-bold transition-colors shadow-[0_0_15px_rgba(16,183,127,0.3)] inline-block">
+            Download
+        </a>
+    </div>
+</div>
+</header>
+
+<main class="pt-24 pb-20">
+
+<!-- Hero Section -->
+<section class="max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-20 grid lg:grid-cols-2 gap-12 lg:gap-8 items-center relative">
+    <!-- Background Glow -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-glow-gradient pointer-events-none z-[-1]"></div>
+
+    <div class="flex flex-col gap-6 lg:max-w-xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/10 w-fit">
+            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            <span class="text-xs font-medium text-primary uppercase tracking-wider">Open Source</span>
+        </div>
+
+        <h2 class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-[-0.03em] leading-[1.1]">
+            Dictate.<br/>
+            <span class="text-gray-400">Format.</span><br/>
+            <span class="text-primary">Paste.</span>
+        </h2>
+
+        <p class="text-lg text-gray-400 leading-relaxed max-w-md">
+            Hold a hotkey, speak, release. Your words are transcribed, cleaned up by AI, and pasted into whatever app you're using. Free forever.
+        </p>
+
+        <div class="flex flex-wrap gap-4 mt-2">
+            <a href="https://github.com/ibrahimshadev/dikt/releases" target="_blank" rel="noopener noreferrer" class="bg-primary hover:bg-primary-dark text-[#0a0a0a] h-12 px-8 rounded font-bold text-base transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined">download</span>
+                Download Free
+            </a>
+            <a href="https://github.com/ibrahimshadev/dikt" target="_blank" rel="noopener noreferrer" class="border border-gray-700 hover:border-gray-500 text-white h-12 px-8 rounded font-bold text-base transition-all flex items-center gap-2 bg-surface-dark/50">
+                <span class="material-symbols-outlined">star</span>
+                Star on GitHub
+            </a>
+        </div>
+
+        <div class="flex items-center gap-4 text-sm text-gray-500 mt-4">
+            <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-lg text-primary">check</span>
+                <span>Windows</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-lg">check</span>
+                <span>macOS</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-lg">check</span>
+                <span>Linux</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Code Editor Mockup -->
+    <div class="relative group">
+        <div class="absolute -inset-1 bg-gradient-to-r from-primary to-emerald-600 rounded opacity-20 blur transition duration-1000 group-hover:duration-200"></div>
+        <div class="relative rounded border border-surface-border bg-[#0a0a0a] shadow-2xl overflow-hidden">
+            <div class="flex items-center gap-2 px-4 py-3 border-b border-surface-border bg-surface-dark">
+                <div class="flex gap-2">
+                    <div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+                    <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+                    <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+                </div>
+                <div class="mx-auto text-xs text-gray-500 font-mono">Claude Code</div>
+            </div>
+            <div class="p-6 font-mono text-sm leading-relaxed overflow-x-auto text-gray-300">
+                <div class="flex">
+                    <span class="text-gray-600 w-8 select-none">1</span>
+                    <span><span class="code-syntax-purple">$</span> <span class="text-gray-400">Hold Ctrl+Space and speak:</span></span>
+                </div>
+                <div class="flex mt-2">
+                    <span class="text-gray-600 w-8 select-none">2</span>
+                    <span class="text-gray-500 italic">"refactor the auth module to use jwt tokens instead of sessions and um make sure the middleware handles token refresh"</span>
+                </div>
+                <div class="flex mt-4">
+                    <span class="text-gray-600 w-8 select-none">3</span>
+                    <span><span class="code-syntax-grey">// Developer Mode output:</span></span>
+                </div>
+                <div class="flex">
+                    <span class="text-gray-600 w-8 select-none">4</span>
+                    <span class="text-white">"Refactor the auth module to use JWT tokens</span>
+                </div>
+                <div class="flex">
+                    <span class="text-gray-600 w-8 select-none"> </span>
+                    <span class="text-white"> instead of sessions. Make sure the middleware</span>
+                </div>
+                <div class="flex">
+                    <span class="text-gray-600 w-8 select-none"> </span>
+                    <span class="text-white"> handles token refresh."</span>
+                </div>
+                <div class="flex mt-4">
+                    <span class="text-gray-600 w-8 select-none">5</span>
+                    <span><span class="code-syntax-green">// Pasted into active app automatically</span></span>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <div class="bg-primary/20 border border-primary/50 text-primary px-3 py-1 rounded text-xs font-bold flex items-center gap-2">
+                        <span class="w-2 h-2 bg-primary rounded-full"></span>
+                        DEVELOPER MODE
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tech Stack Bar -->
+<section class="border-y border-surface-border bg-surface-dark/30 py-10">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
+    <div class="flex items-center gap-10 text-gray-400">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl font-bold text-gray-300">Tauri v2</span>
+        </div>
+        <span class="text-gray-600">+</span>
+        <div class="flex items-center gap-2">
+            <span class="text-2xl font-bold text-gray-300">SolidJS</span>
+        </div>
+        <span class="text-gray-600">+</span>
+        <div class="flex items-center gap-2">
+            <span class="text-2xl font-bold text-gray-300">Rust</span>
+        </div>
+    </div>
+    <div class="flex items-center gap-4">
+        <a href="https://github.com/ibrahimshadev/dikt" target="_blank" rel="noopener noreferrer" class="flex items-center bg-[#161b22] border border-[#30363d] rounded h-8 overflow-hidden group hover:border-gray-500 transition-colors">
+            <div class="flex items-center gap-2 px-3 h-full bg-[#21262d] border-r border-[#30363d]">
+                <span class="material-symbols-outlined text-[16px]">star</span>
+                <span class="text-xs font-bold">Star</span>
+            </div>
+        </a>
+        <div class="flex items-center gap-2 text-xs text-gray-400 font-mono">
+            <span class="material-symbols-outlined text-[16px]">scale</span>
+            MIT LICENSE
+        </div>
+    </div>
+</div>
+</section>
+
+<!-- Modes Showcase -->
+<section class="max-w-6xl mx-auto px-6 py-24" id="showcase">
+<div class="text-center mb-16">
+    <h2 class="text-3xl font-bold mb-4">Dictate in any context</h2>
+    <p class="text-gray-400">Switch modes to format your voice for the task at hand.</p>
+</div>
+
+<div class="bg-surface-dark border border-surface-border rounded-xl overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[500px]">
+    <!-- Sidebar Tabs -->
+    <div class="md:w-64 border-r border-surface-border bg-[#0a0a0a] flex flex-col p-2 gap-1">
+        <button class="flex items-center gap-3 px-4 py-3 rounded text-left bg-surface-dark border border-surface-border text-white group relative overflow-hidden">
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+            <span class="material-symbols-outlined text-primary">auto_awesome</span>
+            <div>
+                <div class="text-sm font-bold">Clean Draft</div>
+                <div class="text-[10px] text-gray-500 uppercase tracking-wider font-mono mt-0.5">Default</div>
+            </div>
+        </button>
+        <button class="flex items-center gap-3 px-4 py-3 rounded text-left text-gray-400 hover:bg-surface-dark/50 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">mail</span>
+            <div>
+                <div class="text-sm font-medium">Email Composer</div>
+            </div>
+        </button>
+        <button class="flex items-center gap-3 px-4 py-3 rounded text-left text-gray-400 hover:bg-surface-dark/50 hover:text-white transition-colors">
+            <span class="material-symbols-outlined">code</span>
+            <div>
+                <div class="text-sm font-medium">Developer Mode</div>
+            </div>
+        </button>
+        <button class="flex items-center gap-3 px-4 py-3 rounded text-left text-gray-400 hover:bg-surface-dark/50 hover:text-white transition-colors mt-auto border-t border-surface-border pt-4">
+            <span class="material-symbols-outlined">add</span>
+            <div class="text-sm font-medium">Create Custom Mode</div>
+        </button>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 p-6 md:p-10 flex flex-col gap-8 bg-[#0a0a0a]">
+        <div class="grid md:grid-cols-2 gap-8 h-full">
+            <!-- Left: Raw Input -->
+            <div class="flex flex-col gap-4">
+                <label class="text-xs font-mono text-gray-500 uppercase tracking-widest">Raw Input (Voice)</label>
+                <div class="flex-1 bg-surface-dark border border-surface-border rounded-lg p-4 font-mono text-sm text-gray-400 leading-relaxed relative">
+                    <span class="absolute top-4 right-4 text-gray-600 material-symbols-outlined text-lg">mic</span>
+                    yeah so basically i think we should probably refactor the auth middleware cause its kinda messy right now and maybe swap to using jwt tokens instead of sessions
+                </div>
+            </div>
+            <!-- Right: Processed Output -->
+            <div class="flex flex-col gap-4">
+                <label class="text-xs font-mono text-primary uppercase tracking-widest flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                    Processed Output
+                </label>
+                <div class="flex-1 bg-gradient-to-br from-surface-dark to-[#0f1210] border border-primary/30 rounded-lg p-4 font-display text-sm text-white leading-relaxed shadow-[0_0_30px_-10px_rgba(16,183,127,0.15)] relative">
+                    <div class="absolute top-2 right-2 flex gap-1">
+                        <button class="p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                        </button>
+                    </div>
+                    <p>I think we should refactor the auth middleware. It's messy right now, and we should swap to using JWT tokens instead of sessions.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Prompt -->
+        <div class="mt-auto pt-6 border-t border-surface-border">
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-xs font-mono text-gray-500 uppercase tracking-widest">System Prompt (Editable)</label>
+                <span class="text-[10px] bg-surface-border px-2 py-0.5 rounded text-gray-400 font-mono">model: llama-3.3-70b-versatile</span>
+            </div>
+            <div class="bg-[#050505] border border-surface-border rounded p-3 font-mono text-xs text-gray-400">
+                <span class="code-syntax-purple">You are</span> a precise text editor that cleans up voice-dictated text. Remove filler words and verbal hesitations. Fix grammar, punctuation, and capitalization. Preserve the speaker's original wording, vocabulary, and tone. Do not rephrase or "improve" their language.
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+<!-- Feature Grid -->
+<section class="max-w-7xl mx-auto px-6 py-16" id="features">
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="p-6 rounded border border-surface-border bg-surface-dark hover:border-primary/50 transition-colors group">
+        <div class="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined">savings</span>
+        </div>
+        <h3 class="font-bold text-lg text-white mb-2">No Subscription</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">
+            Bring your own API key. Groq's free tier, OpenAI, or any OpenAI-compatible endpoint. You control the cost.
+        </p>
+    </div>
+
+    <div class="p-6 rounded border border-surface-border bg-surface-dark hover:border-primary/50 transition-colors group">
+        <div class="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined">security</span>
+        </div>
+        <h3 class="font-bold text-lg text-white mb-2">Private by Design</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">
+            No audio stored on disk. API keys kept in your OS credential manager. Audio goes directly to your chosen API.
+        </p>
+    </div>
+
+    <div class="p-6 rounded border border-surface-border bg-surface-dark hover:border-primary/50 transition-colors group">
+        <div class="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined">bolt</span>
+        </div>
+        <h3 class="font-bold text-lg text-white mb-2">Lightweight</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">
+            Built with Tauri and Rust. The entire app is around 10MB. No Electron, no bloat, launches instantly.
+        </p>
+    </div>
+
+    <div class="p-6 rounded border border-surface-border bg-surface-dark hover:border-primary/50 transition-colors group">
+        <div class="w-10 h-10 rounded bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined">tune</span>
+        </div>
+        <h3 class="font-bold text-lg text-white mb-2">Fully Customizable</h3>
+        <p class="text-sm text-gray-400 leading-relaxed">
+            Create custom modes with your own system prompts. Add vocabulary entries for words the model gets wrong.
+        </p>
+    </div>
+</div>
+</section>
+
+<!-- Getting Started -->
+<section class="max-w-4xl mx-auto px-6 py-20">
+<h2 class="text-3xl font-bold mb-8 text-center">Get started in seconds</h2>
+<div class="rounded-lg overflow-hidden border border-surface-border shadow-2xl bg-[#0d1117] font-mono text-sm relative">
+    <div class="absolute -inset-1 bg-primary/20 blur-xl -z-10"></div>
+    <div class="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-[#30363d]">
+        <div class="flex gap-2">
+            <div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+        </div>
+        <div class="text-gray-500 text-xs">Getting Started</div>
+        <div class="w-10"></div>
+    </div>
+    <div class="p-6 text-gray-300 space-y-5">
+        <div>
+            <div class="flex gap-2">
+                <span class="text-primary font-bold">1.</span>
+                <span>Download the latest release from <a href="https://github.com/ibrahimshadev/dikt/releases" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">GitHub Releases</a></span>
+            </div>
+        </div>
+        <div>
+            <div class="flex gap-2">
+                <span class="text-primary font-bold">2.</span>
+                <span>Run the app and open Settings</span>
+            </div>
+        </div>
+        <div>
+            <div class="flex gap-2">
+                <span class="text-primary font-bold">3.</span>
+                <span>Add your API key — <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Groq</a> (free) or <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">OpenAI</a></span>
+            </div>
+        </div>
+        <div>
+            <div class="flex gap-2">
+                <span class="text-primary font-bold">4.</span>
+                <span>Hold <span class="bg-white/10 px-2 py-0.5 rounded text-xs font-bold">Ctrl+Space</span> and speak</span>
+            </div>
+        </div>
+        <div>
+            <div class="flex gap-2">
+                <span class="text-primary font-bold">5.</span>
+                <span>Release — clean text appears in your active app <span class="text-primary">&#10003;</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+<!-- Comparison Table -->
+<section class="max-w-5xl mx-auto px-6 py-20" id="comparison">
+<h2 class="text-3xl font-bold mb-10 text-center">How Voxly compares</h2>
+<div class="overflow-x-auto rounded border border-surface-border">
+    <table class="w-full text-left text-sm border-collapse">
+        <thead>
+            <tr class="bg-surface-dark border-b border-surface-border">
+                <th class="p-4 font-medium text-gray-400 w-1/4">Feature</th>
+                <th class="p-4 font-bold text-primary bg-primary/5 w-1/4 border-x border-primary/20 relative">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+                    Voxly
+                </th>
+                <th class="p-4 font-medium text-gray-400 w-1/4">Wispr Flow</th>
+                <th class="p-4 font-medium text-gray-400 w-1/4">Superwhisper</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-border">
+            <tr class="hover:bg-surface-dark/50">
+                <td class="p-4 text-gray-300">Pricing</td>
+                <td class="p-4 font-bold text-white bg-primary/5 border-x border-primary/20">Free (BYOK)</td>
+                <td class="p-4 text-gray-500">$15/mo</td>
+                <td class="p-4 text-gray-500">$8.49/mo</td>
+            </tr>
+            <tr class="hover:bg-surface-dark/50">
+                <td class="p-4 text-gray-300">Open Source</td>
+                <td class="p-4 font-bold text-primary bg-primary/5 border-x border-primary/20">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </td>
+                <td class="p-4 text-gray-500"><span class="material-symbols-outlined">cancel</span></td>
+                <td class="p-4 text-gray-500"><span class="material-symbols-outlined">cancel</span></td>
+            </tr>
+            <tr class="hover:bg-surface-dark/50">
+                <td class="p-4 text-gray-300">Custom Modes</td>
+                <td class="p-4 font-bold text-primary bg-primary/5 border-x border-primary/20">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </td>
+                <td class="p-4 text-gray-500"><span class="material-symbols-outlined">check_circle</span></td>
+                <td class="p-4 text-gray-500"><span class="material-symbols-outlined">check_circle</span></td>
+            </tr>
+            <tr class="hover:bg-surface-dark/50">
+                <td class="p-4 text-gray-300">Platforms</td>
+                <td class="p-4 font-bold text-white bg-primary/5 border-x border-primary/20">Windows, macOS, Linux</td>
+                <td class="p-4 text-gray-500">Mac, Windows</td>
+                <td class="p-4 text-gray-500">Mac only</td>
+            </tr>
+            <tr class="hover:bg-surface-dark/50">
+                <td class="p-4 text-gray-300">API Provider</td>
+                <td class="p-4 font-bold text-white bg-primary/5 border-x border-primary/20">Any (BYOK)</td>
+                <td class="p-4 text-gray-500">Built-in only</td>
+                <td class="p-4 text-gray-500">Built-in only</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</section>
+
+<!-- Community Section -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+<div class="grid md:grid-cols-3 gap-6">
+    <a class="group block p-6 rounded border border-surface-border bg-surface-dark hover:bg-surface-border transition-all" href="https://github.com/ibrahimshadev/dikt/issues" target="_blank" rel="noopener noreferrer">
+        <div class="flex items-center justify-between mb-4">
+            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors text-3xl">bug_report</span>
+            <span class="material-symbols-outlined text-gray-600 group-hover:text-white transition-colors">arrow_forward</span>
+        </div>
+        <h3 class="font-bold text-lg text-white">Report a Bug</h3>
+        <p class="text-sm text-gray-400 mt-2">Found something off? Open an issue on GitHub and help us improve.</p>
+    </a>
+    <a class="group block p-6 rounded border border-surface-border bg-surface-dark hover:bg-surface-border transition-all" href="https://github.com/ibrahimshadev/dikt/issues" target="_blank" rel="noopener noreferrer">
+        <div class="flex items-center justify-between mb-4">
+            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors text-3xl">devices</span>
+            <span class="material-symbols-outlined text-gray-600 group-hover:text-white transition-colors">arrow_forward</span>
+        </div>
+        <h3 class="font-bold text-lg text-white">Test on macOS / Linux</h3>
+        <p class="text-sm text-gray-400 mt-2">Currently tested on Windows. We need testers on other platforms.</p>
+    </a>
+    <a class="group block p-6 rounded border border-surface-border bg-surface-dark hover:bg-surface-border transition-all" href="https://github.com/ibrahimshadev/dikt" target="_blank" rel="noopener noreferrer">
+        <div class="flex items-center justify-between mb-4">
+            <span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors text-3xl">code</span>
+            <span class="material-symbols-outlined text-gray-600 group-hover:text-white transition-colors">arrow_forward</span>
+        </div>
+        <h3 class="font-bold text-lg text-white">Contribute</h3>
+        <p class="text-sm text-gray-400 mt-2">MIT licensed. Fork it, improve it, submit a PR. Contributions welcome.</p>
+    </a>
+</div>
+</section>
+
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-surface-border bg-[#050505] py-12">
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">mic</span>
+            <span class="text-xl font-bold text-white tracking-tight">Voxly</span>
+        </div>
+        <p class="text-sm text-gray-500">MIT Licensed. Free and open source.</p>
+    </div>
+    <div class="flex items-center gap-6">
+        <a class="text-sm text-gray-400 hover:text-white transition-colors" href="https://github.com/ibrahimshadev/dikt/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+        <a class="text-sm text-gray-400 hover:text-white transition-colors" href="https://github.com/ibrahimshadev/dikt" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+    <div class="flex items-center gap-2 px-3 py-1 rounded bg-surface-dark border border-surface-border text-xs text-gray-400">
+        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+        Tested on Windows
+    </div>
+</div>
+</footer>
+
+</body>
+</html>
