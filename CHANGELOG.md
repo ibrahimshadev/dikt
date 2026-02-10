@@ -1,3 +1,10 @@
+## [1.16.4](https://github.com/ibrahimshadev/Voxly/compare/v1.16.3...v1.16.4) (2026-02-10)
+
+
+### Bug Fixes
+
+* **pill:** unify click-through as single-authority cursor tracker ([51ebade](https://github.com/ibrahimshadev/Voxly/commit/51ebadefab43b819553ec134c7b12d62583e0bb8))
+
 ## [1.16.3](https://github.com/ibrahimshadev/dikt/compare/v1.16.2...v1.16.3) (2026-02-09)
 
 
