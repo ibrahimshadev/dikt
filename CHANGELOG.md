@@ -1,3 +1,10 @@
+## [1.17.6](https://github.com/ibrahimshadev/Voxly/compare/v1.17.5...v1.17.6) (2026-02-13)
+
+
+### Bug Fixes
+
+* **ci:** fn item to fn pointer cast for add_method, debug Linux artifacts ([2c69db8](https://github.com/ibrahimshadev/Voxly/commit/2c69db8ada2ee565aaa92e5ae8856b405a90685c))
+
 ## [1.17.5](https://github.com/ibrahimshadev/Voxly/compare/v1.17.4...v1.17.5) (2026-02-13)
 
 
