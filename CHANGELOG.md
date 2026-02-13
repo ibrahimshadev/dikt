@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/ibrahimshadev/Voxly/compare/v1.16.4...v1.17.0) (2026-02-13)
+
+
+### Features
+
+* **linux:** add Linux (.deb, .AppImage) distribution support ([64a1331](https://github.com/ibrahimshadev/Voxly/commit/64a13312f23bbc1076eb9eb51f24ac0bb7aa122c))
+
 ## [1.16.4](https://github.com/ibrahimshadev/Voxly/compare/v1.16.3...v1.16.4) (2026-02-10)
 
 
