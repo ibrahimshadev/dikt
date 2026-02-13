@@ -1,3 +1,10 @@
+## [1.17.3](https://github.com/ibrahimshadev/Voxly/compare/v1.17.2...v1.17.3) (2026-02-13)
+
+
+### Bug Fixes
+
+* **ci:** macOS HRTB lifetime on add_method, Linux artifact paths ([fb1f239](https://github.com/ibrahimshadev/Voxly/commit/fb1f239c0b06a11775cefad40e30986532bc461e))
+
 ## [1.17.2](https://github.com/ibrahimshadev/Voxly/compare/v1.17.1...v1.17.2) (2026-02-13)
 
 
