@@ -1,3 +1,10 @@
+## [1.17.2](https://github.com/ibrahimshadev/Voxly/compare/v1.17.1...v1.17.2) (2026-02-13)
+
+
+### Bug Fixes
+
+* **ci:** macOS CStr conversion, bypass tauri-action for Linux upload ([e2d0f7e](https://github.com/ibrahimshadev/Voxly/commit/e2d0f7ec42f88553551421e90d3bdbbafddb8369))
+
 ## [1.17.1](https://github.com/ibrahimshadev/Voxly/compare/v1.17.0...v1.17.1) (2026-02-13)
 
 
