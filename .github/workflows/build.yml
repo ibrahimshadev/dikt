@@ -18,8 +18,8 @@ jobs:
           #   args: '--target aarch64-apple-darwin'
           # - platform: macos-latest
           #   args: '--target x86_64-apple-darwin'
-          # - platform: ubuntu-22.04
-          #   args: ''
+          - platform: ubuntu-22.04
+            args: ''
 
     runs-on: ${{ matrix.platform }}
 
@@ -40,17 +40,18 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      # - name: Install Linux dependencies
-      #   if: matrix.platform == 'ubuntu-22.04'
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y \
-      #       libwebkit2gtk-4.1-dev \
-      #       libayatana-appindicator3-dev \
-      #       librsvg2-dev \
-      #       libssl-dev \
-      #       libxdo-dev \
-      #       patchelf
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libssl-dev \
+            libxdo-dev \
+            libasound2-dev \
+            patchelf
 
       - name: Install dependencies
         run: npm ci
@@ -88,11 +89,11 @@ jobs:
       #     name: dikt-macos-arm64
       #     path: src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
 
-      # - name: Upload artifacts (Linux)
-      #   if: matrix.platform == 'ubuntu-22.04'
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: dikt-linux-x64
-      #     path: |
-      #       src-tauri/target/release/bundle/deb/*.deb
-      #       src-tauri/target/release/bundle/appimage/*.AppImage
+      - name: Upload artifacts (Linux)
+        if: matrix.platform == 'ubuntu-22.04'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dikt-linux-x64
+          path: |
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/appimage/*.AppImage
