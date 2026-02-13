@@ -8,7 +8,10 @@
     "targets": [
       "msi",
       "nsis",
-      "dmg"
+      "dmg",
+      "deb",
+      "appimage",
+      "rpm"
     ],
     "icon": [
       "icons/icon.png",
