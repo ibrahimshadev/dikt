@@ -1,3 +1,10 @@
+## [1.17.1](https://github.com/ibrahimshadev/Voxly/compare/v1.17.0...v1.17.1) (2026-02-13)
+
+
+### Bug Fixes
+
+* **ci:** resolve macOS and Linux build failures ([2131dd5](https://github.com/ibrahimshadev/Voxly/commit/2131dd590742337709da379b5c1a88037b60ff87))
+
 # [1.17.0](https://github.com/ibrahimshadev/Voxly/compare/v1.16.4...v1.17.0) (2026-02-13)
 
 
