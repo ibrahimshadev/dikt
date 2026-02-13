@@ -63,7 +63,7 @@ pub fn setup(window: &tauri::WebviewWindow) {
 
         // Get the original class of the content view
         let original_class: *const AnyClass = msg_send![content_view, class];
-        let class_name = (*original_class).name();
+        let class_name = (*original_class).name().to_str().unwrap_or("Unknown");
 
         // Create a subclass name
         let subclass_name = CString::new(format!("DiktHitTest_{}", class_name)).unwrap();
