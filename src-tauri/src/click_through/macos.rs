@@ -1,6 +1,7 @@
 use objc2::runtime::{AnyClass, AnyObject, Sel};
 use objc2::{msg_send, sel};
 use objc2::declare::ClassBuilder;
+use std::ffi::CString;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 /// Whether the subclass has been applied (only do it once).
@@ -65,7 +66,7 @@ pub fn setup(window: &tauri::WebviewWindow) {
         let class_name = (*original_class).name();
 
         // Create a subclass name
-        let subclass_name = format!("DiktHitTest_{}\0", class_name);
+        let subclass_name = CString::new(format!("DiktHitTest_{}", class_name)).unwrap();
 
         // Check if already registered
         if let Some(_existing) = AnyClass::get(&subclass_name) {
