@@ -1,3 +1,10 @@
+## [1.17.5](https://github.com/ibrahimshadev/Voxly/compare/v1.17.4...v1.17.5) (2026-02-13)
+
+
+### Bug Fixes
+
+* **ci:** safe extern C fn for objc2 0.6, tauri-action for Linux build ([85afab4](https://github.com/ibrahimshadev/Voxly/commit/85afab49d993b0085fd6e154f073af9e5c795a8f))
+
 ## [1.17.4](https://github.com/ibrahimshadev/Voxly/compare/v1.17.3...v1.17.4) (2026-02-13)
 
 
